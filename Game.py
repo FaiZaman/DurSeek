@@ -1,13 +1,15 @@
 import pygame
+from Screen import Screen
 
 pygame.init()
 
 # create game window and background
 screen_width = 1024
 screen_height = 389
-window = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("DurSeek")
+window = Screen(screen_width, screen_height)
+window = window.create_screen()
 background = pygame.image.load("assets/cathedral.jpg")
+
 
 # main event loop
 running = True
