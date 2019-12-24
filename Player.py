@@ -14,7 +14,7 @@ class Player(object):
 
     def draw(self, window):
         
-        if self.steps > 9:
+        if self.steps + 1 > 18:
             self.steps = 0
 
         
