@@ -14,7 +14,7 @@ class Player(object):
         self.walk_right = False
         self.walk_left = False
         self.is_jumping = False
-        self.jump_length = 10
+        self.jump_length = 8
 
 
     def draw(self, window, left_list, right_list):
@@ -28,6 +28,7 @@ class Player(object):
                 self.steps += 1
             elif self.walk_right:
                 window.blit(right_list[self.steps//3], (self.x, self.y))
+                self.steps += 1
         else:
             if self.walk_left:
                 window.blit(left_list[0], (self.x, self.y))

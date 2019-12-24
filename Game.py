@@ -25,7 +25,7 @@ right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.lo
 character = pygame.image.load("assets/character/standing/standing_1.png")
 
 # create player
-player = Player(100, 300, 64, 64)
+player = Player(100, 250, 64, 64)
 
 # main event loop
 running = True
@@ -62,7 +62,7 @@ while running:
             player.walk_right = False
             player.steps = 0
     else:
-        if player.jump_length >= 10:
+        if player.jump_length >= -8:
             multiplier = 1
             if player.jump_length < 0:
                 multiplier = -1
@@ -70,7 +70,7 @@ while running:
             player.jump_length -= 1
         else:
             player.is_jumping = False
-            player.jump_length = 10
+            player.jump_length = 8
 
 
     window.blit(background, (0,0))
