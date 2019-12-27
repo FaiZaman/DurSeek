@@ -5,16 +5,18 @@ from Player import Player
 pygame.init()
 
 # create game window and clock
-screen_width = 1024
-screen_height = 389
+screen_width = 1000
+screen_height = 739
 window = Screen(screen_width, screen_height)
 window = window.create_screen()
 
 # load in background and character
-background = pygame.image.load("assets/background/cathedral.jpg")
+background = pygame.image.load("assets/background/background.jpg")
+background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
+background_x1 = 0
+background_x2 = background.get_width()
 
-background_scroll_1 = 0
-background_scroll_2 = background.get_width()
+ground = pygame.image.load("assets/background/ground.png")
 
 character = pygame.image.load("assets/character/standing/standing_1.png")
 treasure = pygame.image.load("assets/treasure.png")
@@ -32,16 +34,17 @@ right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.lo
 
 
 # create player
-player = Player(100, 250, 64, 64)
+player = Player(100, 550, 64, 64)
 
 
 # draws all objects to window
 def draw_objects(window, player):
 
-    window.blit(background, (background_scroll_1, 0))
-    window.blit(background, (background_scroll_2, 0))
+    window.blit(background, (background_x1, 0))
+    window.blit(background_flipped, (background_x2, 0))
+    window.blit(ground, (0, 639))
     player.draw(window, left_list, right_list)
-    window.blit(treasure, (850, 300))
+    window.blit(treasure, (850, 590))
     pygame.display.update()
 
 
@@ -51,12 +54,12 @@ while running:
 
     clock.tick(18)
 
-    background_scroll_1 -= 5
-    background_scroll_2 -= 5
-    if background_scroll_1 < background.get_width() * -1:
-        background_scroll_1 = background.get_width()
-    if background_scroll_2 < background.get_width() * -1:
-        background_scroll_2 = background.get_width()
+    background_x1 -= 5
+    background_x2 -= 5
+    if background_x1 < background.get_width() * -1:
+        background_x1 = background.get_width()
+    if background_x2 < background.get_width() * -1:
+        background_x2 = background.get_width()
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
