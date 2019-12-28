@@ -1,4 +1,5 @@
 import pygame
+import random as rand
 from Screen import Screen
 from Player import Player
 from Treasure import Treasure
@@ -35,7 +36,6 @@ right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.lo
 
 # create player and treasure
 player = Player(100, 550, 64, 64)
-treasure = Treasure(850, 590, 80, 72)
 
 # draws all game_objects to window
 def redraw_window(window, player):
@@ -45,7 +45,7 @@ def redraw_window(window, player):
     window.blit(background_flipped, (background_x2, 0))
     window.blit(ground, (0, 639))
 
-    # draw game game_objects and update
+    # draw game objects and update
     player.draw(window, left_list, right_list)
     for game_object in game_objects:
         game_object.draw(window)
@@ -54,17 +54,25 @@ def redraw_window(window, player):
 
 game_objects = []
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
+
 # main event loop
 running = True
 while running:
 
+    # clock speed and event detection
     clock.tick(30)
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.USEREVENT+1:
-            game_objects.append(Treasure(1050, 590, 80, 72))
+            if rand.random() > 0.7:
+                game_objects.append(Treasure(1050, 590, 80, 72))
+
+    # collision detection
+    for game_object in game_objects:
+        if player.y - player.height < game_object.hitbox[1] + game_object.hitbox[3] and player.y + player.height > game_object.hitbox[1]:
+            if player.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.x + player.width > game_object.hitbox[0]:
+                game_object.hit(game_object, game_objects)
 
     keys = pygame.key.get_pressed()
         

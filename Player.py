@@ -37,5 +37,4 @@ class Player(object):
                 window.blit(right_list[0], (self.x, self.y))
 
         self.hitbox = (self.x, self.y, self.width, 105)
-        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
-        
+                

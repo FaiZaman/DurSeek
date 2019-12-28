@@ -1,6 +1,5 @@
 import pygame
 
-
 class Treasure(object):
 
     treasure = pygame.image.load("assets/treasure.png")
@@ -17,5 +16,8 @@ class Treasure(object):
 
         window.blit(self.treasure, (self.x, self.y))
         self.hitbox = (self.x, self.y, self.width, self.height)
-        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
         pass
+
+
+    def hit(self, treasure, game_objects):
+        game_objects.pop(game_objects.index(treasure))
