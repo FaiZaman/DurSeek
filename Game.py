@@ -1,15 +1,27 @@
 import pygame
+import random as rand
 from Screen import Screen
 from Player import Player
+from Treasure import Treasure
 
 pygame.init()
 
-# create game window, background, and clock
-screen_width = 1024
-screen_height = 389
+# create game window and clock
+screen_width = 1000
+screen_height = 739
 window = Screen(screen_width, screen_height)
 window = window.create_screen()
-background = pygame.image.load("assets/background/cathedral.jpg")
+
+# load in background and its properties
+background = pygame.image.load("assets/background/background.jpg")
+background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
+background_x1 = 0
+background_x2 = background.get_width()
+background_speed = 10
+
+# load in game object images
+ground = pygame.image.load("assets/background/ground.png")
+character = pygame.image.load("assets/character/standing/standing_1.png")
 
 clock = pygame.time.Clock()
 
@@ -22,39 +34,96 @@ right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.lo
               pygame.image.load("assets/character/walk/R3.png"), pygame.image.load("assets/character/walk/R4.png"),\
               pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
 
-character = pygame.image.load("assets/character/standing/standing_1.png")
+# create player and treasure
+player = Player(100, 550, 64, 64)
 
-# create player
-player = Player(100, 250, 64, 64)
+# draws all game_objects to window
+def redraw_window(window, player):
+
+    # draw background and background game_objects
+    window.blit(background, (background_x1, 0))
+    window.blit(background_flipped, (background_x2, 0))
+    window.blit(ground, (0, 639))
+
+    # draw game objects and update
+    player.draw(window, left_list, right_list)
+    for game_object in game_objects:
+        game_object.draw(window)
+    pygame.display.update()
+
+
+game_objects = []
+pygame.time.set_timer(pygame.USEREVENT+1, 3000)
 
 # main event loop
 running = True
 while running:
 
-    clock.tick(18)
-    
+    # clock speed and event detection
+    clock.tick(30)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.USEREVENT+1:
+            if rand.random() > 0.7:
+                game_objects.append(Treasure(1050, 590, 80, 72))
+
+    # collision detection
+    for game_object in game_objects:
+        if player.y - player.height < game_object.hitbox[1] + game_object.hitbox[3] and player.y + player.height > game_object.hitbox[1]:
+            if player.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.x + player.width > game_object.hitbox[0]:
+                game_object.hit(game_object, game_objects)
 
     keys = pygame.key.get_pressed()
         
+    # player movement
     if keys[pygame.K_LEFT] and player.x > player.speed:
         player.x -= player.speed
         player.walk_left = True
         player.walk_right = False
         player.standing = False
 
-    elif keys[pygame.K_RIGHT] and player.x + player.speed + player.width < screen_width:
-        player.x += player.speed
+        # background scrolling with player
+        background_x1 += background_speed
+        if background_x1 > background.get_width():
+            background_x1 = background.get_width() * -1
+
+        background_x2 += background_speed
+        if background_x2 > background.get_width():
+            background_x2 = background.get_width() * -1
+
+        # move game objects right
+        for game_object in game_objects:
+            game_object.x += background_speed
+
+    elif keys[pygame.K_RIGHT]:
+
+        if player.x < 300:
+            player.x += player.speed
         player.walk_left = False
         player.walk_right = True
         player.standing = False
+
+        # background scrolling with player
+        background_x1 -= background_speed
+        if background_x1 < background.get_width() * -1:
+            background_x1 = background.get_width()
+
+        background_x2 -= background_speed
+        if background_x2 < background.get_width() * -1:
+            background_x2 = background.get_width()
+
+        # move game objects left
+        for game_object in game_objects:
+            game_object.x -= background_speed
+            if game_object.x <= game_object.width * -1:
+                game_objects.pop(game_objects.index(game_object))
 
     else:
         player.standing = True
         player.steps = 0
 
+    # quadratic jumping functionality
     if not(player.is_jumping):
         if keys[pygame.K_SPACE]:
             player.is_jumping = True
@@ -72,9 +141,6 @@ while running:
             player.is_jumping = False
             player.jump_length = 8
 
-
-    window.blit(background, (0,0))
-    player.draw(window, left_list, right_list)
-    pygame.display.update()
+    redraw_window(window, player)
 
 pygame.quit()
