@@ -33,32 +33,38 @@ right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.lo
               pygame.image.load("assets/character/walk/R3.png"), pygame.image.load("assets/character/walk/R4.png"),\
               pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
 
-# create player
+# create player and treasure
 player = Player(100, 550, 64, 64)
 treasure = Treasure(850, 590, 80, 72)
 
-# draws all objects to window
-def draw_objects(window, player):
+# draws all game_objects to window
+def redraw_window(window, player):
 
-    # draw background and background objects
+    # draw background and background game_objects
     window.blit(background, (background_x1, 0))
     window.blit(background_flipped, (background_x2, 0))
     window.blit(ground, (0, 639))
 
-    # draw game objects and update
+    # draw game game_objects and update
     player.draw(window, left_list, right_list)
-    treasure.draw(window)
+    for game_object in game_objects:
+        game_object.draw(window)
     pygame.display.update()
 
 
+game_objects = []
+pygame.time.set_timer(pygame.USEREVENT+1, 3000)
 # main event loop
 running = True
 while running:
 
-    clock.tick(18)
+    clock.tick(30)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.USEREVENT+1:
+            game_objects.append(Treasure(1050, 590, 80, 72))
 
     keys = pygame.key.get_pressed()
         
@@ -69,6 +75,7 @@ while running:
         player.walk_right = False
         player.standing = False
 
+        # background scrolling with player
         background_x1 += background_speed
         if background_x1 > background.get_width():
             background_x1 = background.get_width() * -1
@@ -76,6 +83,10 @@ while running:
         background_x2 += background_speed
         if background_x2 > background.get_width():
             background_x2 = background.get_width() * -1
+
+        # move game objects right
+        for game_object in game_objects:
+            game_object.x += background_speed
 
     elif keys[pygame.K_RIGHT]:
 
@@ -93,6 +104,12 @@ while running:
         background_x2 -= background_speed
         if background_x2 < background.get_width() * -1:
             background_x2 = background.get_width()
+
+        # move game objects left
+        for game_object in game_objects:
+            game_object.x -= background_speed
+            if game_object.x <= game_object.width * -1:
+                game_objects.pop(game_objects.index(game_object))
 
     else:
         player.standing = True
@@ -116,6 +133,6 @@ while running:
             player.is_jumping = False
             player.jump_length = 8
 
-    draw_objects(window, player)
+    redraw_window(window, player)
 
 pygame.quit()

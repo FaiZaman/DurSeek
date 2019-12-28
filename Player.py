@@ -15,7 +15,7 @@ class Player(object):
         self.walk_left = False
         self.is_jumping = False
         self.jump_length = 8
-        self.hitbox = (self.x, self.y, self.width, 105)
+        self.hitbox = (x, y, width, 105)
 
 
     def draw(self, window, left_list, right_list):
