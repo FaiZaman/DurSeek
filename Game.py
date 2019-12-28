@@ -10,14 +10,15 @@ screen_height = 739
 window = Screen(screen_width, screen_height)
 window = window.create_screen()
 
-# load in background and character
+# load in background and its properties
 background = pygame.image.load("assets/background/background.jpg")
 background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
 background_x1 = 0
 background_x2 = background.get_width()
+background_speed = 10
 
+# load in game object images
 ground = pygame.image.load("assets/background/ground.png")
-
 character = pygame.image.load("assets/character/standing/standing_1.png")
 treasure = pygame.image.load("assets/treasure.png")
 
@@ -32,17 +33,18 @@ right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.lo
               pygame.image.load("assets/character/walk/R3.png"), pygame.image.load("assets/character/walk/R4.png"),\
               pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
 
-
 # create player
 player = Player(100, 550, 64, 64)
-
 
 # draws all objects to window
 def draw_objects(window, player):
 
+    # draw background and background objects
     window.blit(background, (background_x1, 0))
     window.blit(background_flipped, (background_x2, 0))
     window.blit(ground, (0, 639))
+
+    # draw game objects and update
     player.draw(window, left_list, right_list)
     window.blit(treasure, (850, 590))
     pygame.display.update()
@@ -53,14 +55,6 @@ running = True
 while running:
 
     clock.tick(18)
-
-    background_x1 -= 5
-    background_x2 -= 5
-    if background_x1 < background.get_width() * -1:
-        background_x1 = background.get_width()
-    if background_x2 < background.get_width() * -1:
-        background_x2 = background.get_width()
-    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -74,11 +68,30 @@ while running:
         player.walk_right = False
         player.standing = False
 
-    elif keys[pygame.K_RIGHT] and player.x + player.speed + player.width < screen_width:
-        player.x += player.speed
+        background_x1 += background_speed
+        if background_x1 > background.get_width():
+            background_x1 = background.get_width()
+
+        background_x2 += background_speed
+        if background_x2 > background.get_width():
+            background_x2 = background.get_width()
+
+    elif keys[pygame.K_RIGHT]:
+
+        if player.x < 300:
+            player.x += player.speed
         player.walk_left = False
         player.walk_right = True
         player.standing = False
+
+        # background scrolling with player
+        background_x1 -= background_speed
+        if background_x1 < background.get_width() * -1:
+            background_x1 = background.get_width()
+
+        background_x2 -= background_speed
+        if background_x2 < background.get_width() * -1:
+            background_x2 = background.get_width()
 
     else:
         player.standing = True
