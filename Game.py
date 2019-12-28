@@ -1,6 +1,7 @@
 import pygame
 from Screen import Screen
 from Player import Player
+from Treasure import Treasure
 
 pygame.init()
 
@@ -20,7 +21,6 @@ background_speed = 10
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
 character = pygame.image.load("assets/character/standing/standing_1.png")
-treasure = pygame.image.load("assets/treasure.png")
 
 clock = pygame.time.Clock()
 
@@ -35,6 +35,7 @@ right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.lo
 
 # create player
 player = Player(100, 550, 64, 64)
+treasure = Treasure(850, 590, 80, 72)
 
 # draws all objects to window
 def draw_objects(window, player):
@@ -46,7 +47,7 @@ def draw_objects(window, player):
 
     # draw game objects and update
     player.draw(window, left_list, right_list)
-    window.blit(treasure, (850, 590))
+    treasure.draw(window)
     pygame.display.update()
 
 
@@ -70,11 +71,11 @@ while running:
 
         background_x1 += background_speed
         if background_x1 > background.get_width():
-            background_x1 = background.get_width()
+            background_x1 = background.get_width() * -1
 
         background_x2 += background_speed
         if background_x2 > background.get_width():
-            background_x2 = background.get_width()
+            background_x2 = background.get_width() * -1
 
     elif keys[pygame.K_RIGHT]:
 

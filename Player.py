@@ -15,6 +15,7 @@ class Player(object):
         self.walk_left = False
         self.is_jumping = False
         self.jump_length = 8
+        self.hitbox = (self.x, self.y, self.width, 105)
 
 
     def draw(self, window, left_list, right_list):
@@ -35,4 +36,6 @@ class Player(object):
             else:
                 window.blit(right_list[0], (self.x, self.y))
 
+        self.hitbox = (self.x, self.y, self.width, 105)
+        pygame.draw.rect(window, (255, 0, 0), self.hitbox, 2)
         
