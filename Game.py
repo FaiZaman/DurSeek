@@ -5,6 +5,7 @@ from Player import Player
 from Treasure import Treasure
 
 pygame.init()
+score = 0
 
 # create game window and clock
 screen_width = 1000
@@ -21,7 +22,8 @@ background_speed = 10
 
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
-character = pygame.image.load("assets/character/standing/standing_1.png")
+left_standing_list = [pygame.image.load("assets/character/standing/standing_L1.png"), pygame.image.load("assets/character/standing/standing_L2.png")]
+right_standing_list = [pygame.image.load("assets/character/standing/standing_R1.png"), pygame.image.load("assets/character/standing/standing_R2.png")]
 
 clock = pygame.time.Clock()
 
@@ -35,7 +37,7 @@ right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.lo
               pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
 
 # create player and treasure
-player = Player(100, 550, 64, 64)
+player = Player(100, 550, 64, 106)
 
 # draws all game_objects to window
 def redraw_window(window, player):
@@ -45,14 +47,20 @@ def redraw_window(window, player):
     window.blit(background_flipped, (background_x2, 0))
     window.blit(ground, (0, 639))
 
+    # render the score
+    text = font.render('Score: ' + str(score), 1, (0, 0, 0))
+    window.blit(text, (10, 10))
+
     # draw game objects and update
-    player.draw(window, left_list, right_list)
+    player.draw(window, left_list, right_list, left_standing_list, right_standing_list)
     for game_object in game_objects:
         game_object.draw(window)
     pygame.display.update()
 
 
+# create game object list, object spawn timer, and font
 game_objects = []
+font = pygame.font.SysFont('comicsans', 30, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
 
 # main event loop
@@ -60,7 +68,7 @@ running = True
 while running:
 
     # clock speed and event detection
-    clock.tick(30)
+    clock.tick(36)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -68,11 +76,16 @@ while running:
             if rand.random() > 0.7:
                 game_objects.append(Treasure(1050, 590, 80, 72))
 
+    # check score to see if game over
+    
+
     # collision detection
     for game_object in game_objects:
         if player.y - player.height < game_object.hitbox[1] + game_object.hitbox[3] and player.y + player.height > game_object.hitbox[1]:
             if player.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.x + player.width > game_object.hitbox[0]:
                 game_object.hit(game_object, game_objects)
+                if isinstance(game_object, Treasure):
+                    score += 1
 
     keys = pygame.key.get_pressed()
         
