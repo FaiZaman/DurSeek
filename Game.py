@@ -3,8 +3,11 @@ import random as rand
 from Screen import Screen
 from Player import Player
 from Treasure import Treasure
+from Enemy import Enemy
 
 pygame.init()
+score = 0
+win_score = 5
 
 # create game window and clock
 screen_width = 1000
@@ -21,21 +24,10 @@ background_speed = 10
 
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
-character = pygame.image.load("assets/character/standing/standing_1.png")
-
 clock = pygame.time.Clock()
 
-# load in character sprite images
-left_list = [pygame.image.load("assets/character/walk/L1.png"), pygame.image.load("assets/character/walk/L2.png"),\
-             pygame.image.load("assets/character/walk/L3.png"), pygame.image.load("assets/character/walk/L4.png"),\
-             pygame.image.load("assets/character/walk/L5.png"), pygame.image.load("assets/character/walk/L6.png")]
-
-right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.load("assets/character/walk/R2.png"),\
-              pygame.image.load("assets/character/walk/R3.png"), pygame.image.load("assets/character/walk/R4.png"),\
-              pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
-
-# create player and treasure
-player = Player(100, 550, 64, 64)
+# create player
+player = Player(100, 550, 64, 106)
 
 # draws all game_objects to window
 def redraw_window(window, player):
@@ -45,35 +37,76 @@ def redraw_window(window, player):
     window.blit(background_flipped, (background_x2, 0))
     window.blit(ground, (0, 639))
 
+    # render the score
+    text = font.render('Score: ' + str(score), 1, (0, 0, 0))
+    window.blit(text, (10, 60))
+
+    # draw health bar
+    pygame.draw.rect(window, (200, 0, 0), (10, 10, 500, 40))
+    pygame.draw.rect(window, (0, 180, 0), (10, 10, player.health * 5, 40))
+    pygame.draw.rect(window, (0, 0, 0), (10, 10, 500, 40), 2)
+
     # draw game objects and update
-    player.draw(window, left_list, right_list)
+    player.draw(window)
     for game_object in game_objects:
         game_object.draw(window)
     pygame.display.update()
 
 
+def draw_game_over(window, won):
+
+    if won:
+        text = font.render('You Win!', 1, (0, 0, 0))
+    else:
+        text = font.render('You Lose!', 1, (0, 0, 0))
+    
+    window.fill((255, 255, 255))
+    window.blit(text, (450, 300))
+    pygame.display.update()
+
+
+# create game object list, object spawn timer, and font
 game_objects = []
+font = pygame.font.SysFont('comicsans', 30, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
+game_over = False
 
 # main event loop
 running = True
 while running:
 
     # clock speed and event detection
-    clock.tick(30)
+    clock.tick(36)
+
+    if game_over:
+        draw_game_over(window, won)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.USEREVENT+1:
-            if rand.random() > 0.7:
+            spawn_probability = rand.random()
+            if spawn_probability > 0.7:
                 game_objects.append(Treasure(1050, 590, 80, 72))
+            elif spawn_probability > 0.3:
+                game_objects.append(Enemy(1050, 600, 50, 50))
 
     # collision detection
     for game_object in game_objects:
         if player.y - player.height < game_object.hitbox[1] + game_object.hitbox[3] and player.y + player.height > game_object.hitbox[1]:
-            if player.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.x + player.width > game_object.hitbox[0]:
-                game_object.hit(game_object, game_objects)
+            if player.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.x + player.width > game_object.hitbox[0]:                
+                game_object.hit(player, game_object, game_objects)
+                if isinstance(game_object, Treasure):
+                    score += 1
 
+    # check score and health to see if game over
+    if score >= win_score:
+        game_over = True
+        won = True
+    elif player.health == 0:
+        game_over = True
+        won = False
+   
     keys = pygame.key.get_pressed()
         
     # player movement
@@ -141,6 +174,7 @@ while running:
             player.is_jumping = False
             player.jump_length = 8
 
-    redraw_window(window, player)
+    if not(game_over):
+        redraw_window(window, player)
 
 pygame.quit()

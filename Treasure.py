@@ -2,7 +2,7 @@ import pygame
 
 class Treasure(object):
 
-    treasure = pygame.image.load("assets/treasure.png")
+    treasure = pygame.image.load("assets/misc/treasure.png")
 
     def __init__(self, x, y, width, height):
         self.x = x
@@ -19,5 +19,5 @@ class Treasure(object):
         pass
 
 
-    def hit(self, treasure, game_objects):
+    def hit(self, player, treasure, game_objects):
         game_objects.pop(game_objects.index(treasure))
