@@ -3,9 +3,11 @@ import random as rand
 from Screen import Screen
 from Player import Player
 from Treasure import Treasure
+from Enemy import Enemy
 
 pygame.init()
 score = 0
+win_score = 5
 
 # create game window and clock
 screen_width = 1000
@@ -22,21 +24,9 @@ background_speed = 10
 
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
-left_standing_list = [pygame.image.load("assets/character/standing/standing_L1.png"), pygame.image.load("assets/character/standing/standing_L2.png")]
-right_standing_list = [pygame.image.load("assets/character/standing/standing_R1.png"), pygame.image.load("assets/character/standing/standing_R2.png")]
-
 clock = pygame.time.Clock()
 
-# load in character sprite images
-left_list = [pygame.image.load("assets/character/walk/L1.png"), pygame.image.load("assets/character/walk/L2.png"),\
-             pygame.image.load("assets/character/walk/L3.png"), pygame.image.load("assets/character/walk/L4.png"),\
-             pygame.image.load("assets/character/walk/L5.png"), pygame.image.load("assets/character/walk/L6.png")]
-
-right_list = [pygame.image.load("assets/character/walk/R1.png"), pygame.image.load("assets/character/walk/R2.png"),\
-              pygame.image.load("assets/character/walk/R3.png"), pygame.image.load("assets/character/walk/R4.png"),\
-              pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
-
-# create player and treasure
+# create player
 player = Player(100, 550, 64, 106)
 
 # draws all game_objects to window
@@ -52,7 +42,7 @@ def redraw_window(window, player):
     window.blit(text, (10, 10))
 
     # draw game objects and update
-    player.draw(window, left_list, right_list, left_standing_list, right_standing_list)
+    player.draw(window)
     for game_object in game_objects:
         game_object.draw(window)
     pygame.display.update()
@@ -86,8 +76,11 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.USEREVENT+1:
-            if rand.random() > 0.7:
+            spawn_probability = rand.random()
+            if spawn_probability > 0.7:
                 game_objects.append(Treasure(1050, 590, 80, 72))
+            elif spawn_probability > 0.3:
+                game_objects.append(Enemy(1050, 600, 50, 50))
 
     # collision detection
     for game_object in game_objects:
@@ -98,7 +91,7 @@ while running:
                     score += 1
 
     # check score to see if game over
-    if score >= 2:
+    if score >= win_score:
         game_over = True
    
     keys = pygame.key.get_pressed()
