@@ -2,7 +2,7 @@ import pygame
 
 class Treasure(object):
 
-    treasure = pygame.image.load("assets/treasure.png")
+    treasure = pygame.image.load("assets/misc/treasure.png")
 
     def __init__(self, x, y, width, height):
         self.x = x

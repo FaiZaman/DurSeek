@@ -42,8 +42,8 @@ def redraw_window(window, player):
     window.blit(text, (10, 60))
 
     # draw health bar
-    pygame.draw.rect(window, (255, 0, 0), (10, 10, 500, 40))
-    pygame.draw.rect(window, (0, 255, 0), (10, 10, player.health * 5, 40))
+    pygame.draw.rect(window, (200, 0, 0), (10, 10, 500, 40))
+    pygame.draw.rect(window, (0, 180, 0), (10, 10, player.health * 5, 40))
     pygame.draw.rect(window, (0, 0, 0), (10, 10, 500, 40), 2)
 
     # draw game objects and update
@@ -53,9 +53,13 @@ def redraw_window(window, player):
     pygame.display.update()
 
 
-def draw_game_over(window):
+def draw_game_over(window, won):
 
-    text = font.render('You Win!', 1, (0, 0, 0))
+    if won:
+        text = font.render('You Win!', 1, (0, 0, 0))
+    else:
+        text = font.render('You Lose!', 1, (0, 0, 0))
+    
     window.fill((255, 255, 255))
     window.blit(text, (450, 300))
     pygame.display.update()
@@ -75,7 +79,7 @@ while running:
     clock.tick(36)
 
     if game_over:
-        draw_game_over(window)
+        draw_game_over(window, won)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -98,8 +102,10 @@ while running:
     # check score and health to see if game over
     if score >= win_score:
         game_over = True
+        won = True
     elif player.health == 0:
         game_over = True
+        won = False
    
     keys = pygame.key.get_pressed()
         
