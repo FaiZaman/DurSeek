@@ -58,10 +58,19 @@ def redraw_window(window, player):
     pygame.display.update()
 
 
+def draw_game_over(window):
+
+    text = font.render('You Win!', 1, (0, 0, 0))
+    window.fill((255, 255, 255))
+    window.blit(text, (450, 300))
+    pygame.display.update()
+
+
 # create game object list, object spawn timer, and font
 game_objects = []
 font = pygame.font.SysFont('comicsans', 30, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
+game_over = False
 
 # main event loop
 running = True
@@ -69,15 +78,16 @@ while running:
 
     # clock speed and event detection
     clock.tick(36)
+
+    if game_over:
+        draw_game_over(window)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.USEREVENT+1:
             if rand.random() > 0.7:
                 game_objects.append(Treasure(1050, 590, 80, 72))
-
-    # check score to see if game over
-    
 
     # collision detection
     for game_object in game_objects:
@@ -87,6 +97,10 @@ while running:
                 if isinstance(game_object, Treasure):
                     score += 1
 
+    # check score to see if game over
+    if score >= 2:
+        game_over = True
+   
     keys = pygame.key.get_pressed()
         
     # player movement
@@ -154,6 +168,7 @@ while running:
             player.is_jumping = False
             player.jump_length = 8
 
-    redraw_window(window, player)
+    if not(game_over):
+        redraw_window(window, player)
 
 pygame.quit()
