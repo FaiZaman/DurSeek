@@ -19,5 +19,5 @@ class Treasure(object):
         pass
 
 
-    def hit(self, treasure, game_objects):
+    def hit(self, player, treasure, game_objects):
         game_objects.pop(game_objects.index(treasure))

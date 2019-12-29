@@ -22,6 +22,7 @@ class Player(object):
         self.height = height
         self.speed = 10
         self.steps = 0
+        self.health = 100
         self.standing = True
         self.stand_count = 0
         self.walk_right = False
@@ -52,4 +53,3 @@ class Player(object):
             self.stand_count += 1
 
         self.hitbox = (self.x, self.y, self.width, 105)
-                

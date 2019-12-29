@@ -1,4 +1,5 @@
 import pygame
+from Player import Player
 
 class Enemy(object):
 
@@ -31,5 +32,6 @@ class Enemy(object):
         self.hitbox = (self.x, self.y, self.width, self.height)
 
     
-    def hit(self, game_object, game_objects):
-        print("oof")
+    def hit(self, player, game_object, game_objects):
+        
+        player.health -= 10

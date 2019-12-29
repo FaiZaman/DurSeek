@@ -39,7 +39,12 @@ def redraw_window(window, player):
 
     # render the score
     text = font.render('Score: ' + str(score), 1, (0, 0, 0))
-    window.blit(text, (10, 10))
+    window.blit(text, (10, 60))
+
+    # draw health bar
+    pygame.draw.rect(window, (255, 0, 0), (10, 10, 500, 40))
+    pygame.draw.rect(window, (0, 255, 0), (10, 10, player.health * 5, 40))
+    pygame.draw.rect(window, (0, 0, 0), (10, 10, 500, 40), 2)
 
     # draw game objects and update
     player.draw(window)
@@ -85,13 +90,15 @@ while running:
     # collision detection
     for game_object in game_objects:
         if player.y - player.height < game_object.hitbox[1] + game_object.hitbox[3] and player.y + player.height > game_object.hitbox[1]:
-            if player.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.x + player.width > game_object.hitbox[0]:
-                game_object.hit(game_object, game_objects)
+            if player.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.x + player.width > game_object.hitbox[0]:                
+                game_object.hit(player, game_object, game_objects)
                 if isinstance(game_object, Treasure):
                     score += 1
 
-    # check score to see if game over
+    # check score and health to see if game over
     if score >= win_score:
+        game_over = True
+    elif player.health == 0:
         game_over = True
    
     keys = pygame.key.get_pressed()
