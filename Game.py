@@ -26,8 +26,9 @@ background_speed = 5
 ground = pygame.image.load("assets/background/ground.png")
 clock = pygame.time.Clock()
 
-# create player
+# create player and sprite groups
 sprites = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
 player = Player()
 sprites.add(player)
 
@@ -48,11 +49,13 @@ def redraw_window(window, player):
     pygame.draw.rect(window, (0, 180, 0), (10, 10, player.health * 5, 40))
     pygame.draw.rect(window, (0, 0, 0), (10, 10, 500, 40), 2)
 
-    # draw game objects and update
+    # update sprite images
     player.set_image()
+    for enemy in enemies:
+        enemy.set_image()
+
+    # draw sprites and refresh display
     sprites.draw(window)
-    #for game_object in game_objects:
-     #   game_object.draw(window)
     pygame.display.update()
 
 
@@ -94,7 +97,10 @@ while running:
                 game_objects.append(treasure)
                 sprites.add(treasure)
             elif spawn_probability > 0.3:
-                game_objects.append(Enemy(1050, 600, 50, 50))
+                enemy = Enemy()
+                game_objects.append(enemy)
+                enemies.add(enemy)
+                sprites.add(enemy)
 
     # collision detection
     '''
@@ -155,7 +161,7 @@ while running:
         # move game objects left
         for game_object in game_objects:
             game_object.rect.x -= background_speed
-            if game_object.rect.x <= game_object.width * -1:
+            if game_object.rect.x <= game_object.rect.width * -1:
                 game_objects.pop(game_objects.index(game_object))
 
     else:

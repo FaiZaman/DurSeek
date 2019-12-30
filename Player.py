@@ -16,13 +16,9 @@ class Player(Entity):
     right_standing_list = [pygame.image.load("assets/character/standing/standing_R1.png"), pygame.image.load("assets/character/standing/standing_R2.png")]
 
     def __init__(self):
-        
+
         super().__init__(100, 550, self.right_standing_list[0])
         self.speed = 10
-        self.image_walking_left = self.left_list
-        self.image_walking_right = self.right_list
-        self.walking_images = self.image_walking_right
-        self.image_index = 0
         self.steps = 0
         self.health = 100
         self.standing = True
@@ -41,16 +37,10 @@ class Player(Entity):
         if not(self.standing):
             self.stand_count = 0
             if self.walk_left:
-                self.walking_images = self.image_walking_left
-            else:
-                self.walking_images = self.image_walking_right
-
-            if self.steps == 0:
-                self.image_index = (self.image_index + 4) % len(self.walking_images)
-                self.image = self.walking_images[self.image_index]
-            
-            self.steps = (self.steps + 1) % self.speed 
-
+                self.image = self.left_list[self.steps//3]
+            elif self.walk_right:
+                self.image = self.right_list[self.steps//3]
+            self.steps += 1
         else:
             if self.walk_left:
                 self.image = self.left_standing_list[self.stand_count % 2]
