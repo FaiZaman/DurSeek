@@ -1,6 +1,7 @@
 import pygame
+from Entity import Entity
 
-class Player(object):
+class Player(Entity):
 
     # load in character sprite images
     left_list = [pygame.image.load("assets/character/walk/L1.png"), pygame.image.load("assets/character/walk/L2.png"),\
@@ -14,13 +15,14 @@ class Player(object):
     left_standing_list = [pygame.image.load("assets/character/standing/standing_L1.png"), pygame.image.load("assets/character/standing/standing_L2.png")]
     right_standing_list = [pygame.image.load("assets/character/standing/standing_R1.png"), pygame.image.load("assets/character/standing/standing_R2.png")]
 
-    def __init__(self, x, y, width, height):
+    def __init__(self):
         
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+        super().__init__(100, 550, self.right_standing_list[0])
         self.speed = 10
+        self.image_walking_left = self.left_list
+        self.image_walking_right = self.right_list
+        self.walking_images = self.image_walking_right
+        self.image_index = 0
         self.steps = 0
         self.health = 100
         self.standing = True
@@ -29,27 +31,29 @@ class Player(object):
         self.walk_left = False
         self.is_jumping = False
         self.jump_length = 8
-        self.hitbox = (x, y, width, 105)
 
+    
+    def set_image(self):
 
-    def draw(self, window):
-        
         if self.steps + 1 > 18:
             self.steps = 0
 
         if not(self.standing):
             self.stand_count = 0
             if self.walk_left:
-                window.blit(self.left_list[self.steps//3], (self.x, self.y))
-                self.steps += 1
-            elif self.walk_right:
-                window.blit(self.right_list[self.steps//3], (self.x, self.y))
-                self.steps += 1
+                self.walking_images = self.image_walking_left
+            else:
+                self.walking_images = self.image_walking_right
+
+            if self.steps == 0:
+                self.image_index = (self.image_index + 4) % len(self.walking_images)
+                self.image = self.walking_images[self.image_index]
+            
+            self.steps = (self.steps + 1) % self.speed 
+
         else:
             if self.walk_left:
-                window.blit(self.left_standing_list[self.stand_count % 2], (self.x, self.y))
+                self.image = self.left_standing_list[self.stand_count % 2]
             else:
-                window.blit(self.right_standing_list[self.stand_count % 2], (self.x, self.y))
+                self.image = self.right_standing_list[self.stand_count % 2]
             self.stand_count += 1
-
-        self.hitbox = (self.x, self.y, self.width, 105)

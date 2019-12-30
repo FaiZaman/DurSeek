@@ -20,14 +20,16 @@ background = pygame.image.load("assets/background/background.jpg")
 background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
 background_x1 = 0
 background_x2 = background.get_width()
-background_speed = 10
+background_speed = 5
 
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
 clock = pygame.time.Clock()
 
 # create player
-player = Player(100, 550, 64, 106)
+sprites = pygame.sprite.Group()
+player = Player()
+sprites.add(player)
 
 # draws all game_objects to window
 def redraw_window(window, player):
@@ -47,9 +49,10 @@ def redraw_window(window, player):
     pygame.draw.rect(window, (0, 0, 0), (10, 10, 500, 40), 2)
 
     # draw game objects and update
-    player.draw(window)
-    for game_object in game_objects:
-        game_object.draw(window)
+    player.set_image()
+    sprites.draw(window)
+    #for game_object in game_objects:
+     #   game_object.draw(window)
     pygame.display.update()
 
 
@@ -87,18 +90,21 @@ while running:
         if event.type == pygame.USEREVENT+1:
             spawn_probability = rand.random()
             if spawn_probability > 0.7:
-                game_objects.append(Treasure(1050, 590, 80, 72))
+                treasure = Treasure()
+                game_objects.append(treasure)
+                sprites.add(treasure)
             elif spawn_probability > 0.3:
                 game_objects.append(Enemy(1050, 600, 50, 50))
 
     # collision detection
+    '''
     for game_object in game_objects:
-        if player.y - player.height < game_object.hitbox[1] + game_object.hitbox[3] and player.y + player.height > game_object.hitbox[1]:
-            if player.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.x + player.width > game_object.hitbox[0]:                
+        if player.rect.y - player.height < game_object.hitbox[1] + game_object.hitbox[3] and player.rect.y + player.height > game_object.hitbox[1]:
+            if player.rect.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.rect.x + player.width > game_object.hitbox[0]:                
                 game_object.hit(player, game_object, game_objects)
                 if isinstance(game_object, Treasure):
                     score += 1
-
+'''
     # check score and health to see if game over
     if score >= win_score:
         game_over = True
@@ -110,8 +116,8 @@ while running:
     keys = pygame.key.get_pressed()
         
     # player movement
-    if keys[pygame.K_LEFT] and player.x > player.speed:
-        player.x -= player.speed
+    if keys[pygame.K_LEFT] and player.rect.x > player.speed:
+        player.rect.x -= player.speed
         player.walk_left = True
         player.walk_right = False
         player.standing = False
@@ -127,12 +133,12 @@ while running:
 
         # move game objects right
         for game_object in game_objects:
-            game_object.x += background_speed
+            game_object.rect.x += background_speed
 
     elif keys[pygame.K_RIGHT]:
 
-        if player.x < 300:
-            player.x += player.speed
+        if player.rect.x < 300:
+            player.rect.x += player.speed
         player.walk_left = False
         player.walk_right = True
         player.standing = False
@@ -148,8 +154,8 @@ while running:
 
         # move game objects left
         for game_object in game_objects:
-            game_object.x -= background_speed
-            if game_object.x <= game_object.width * -1:
+            game_object.rect.x -= background_speed
+            if game_object.rect.x <= game_object.width * -1:
                 game_objects.pop(game_objects.index(game_object))
 
     else:
@@ -168,7 +174,7 @@ while running:
             multiplier = 1
             if player.jump_length < 0:
                 multiplier = -1
-            player.y -= (player.jump_length ** 2) * 0.5 * multiplier
+            player.rect.bottom -= (player.jump_length ** 2) * 0.5 * multiplier
             player.jump_length -= 1
         else:
             player.is_jumping = False
