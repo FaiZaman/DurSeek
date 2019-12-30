@@ -48,8 +48,45 @@ class Player(Entity):
                 self.image = self.right_standing_list[self.stand_count % 2]
             self.stand_count += 1
 
+
+    def move_left(self):
+
+        self.rect.x -= self.speed
+        self.walk_left = True
+        self.walk_right = False
+        self.standing = False
     
+    
+    def move_right(self):
+
+        if self.rect.x < 300:
+            self.rect.x += self.speed
+        self.walk_left = False
+        self.walk_right = True
+        self.standing = False
+
+
+    def jump(self, jump_key):
+
+        # quadratic jumping functionality
+        if not(self.is_jumping):
+            if jump_key:
+                self.is_jumping = True
+                self.walk_left = False
+                self.walk_right = False
+                self.steps = 0
+        else:
+            if self.jump_length >= -8:
+                multiplier = 1
+                if self.jump_length < 0:
+                    multiplier = -1
+                self.rect.bottom -= (self.jump_length ** 2) * 0.5 * multiplier
+                self.jump_length -= 1
+            else:
+                self.is_jumping = False
+                self.jump_length = 8
+    
+
     def lose_health(self):
 
         self.health -= 10
-        

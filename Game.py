@@ -126,10 +126,8 @@ while running:
         
     # player movement
     if keys[pygame.K_LEFT] and player.rect.x > player.speed:
-        player.rect.x -= player.speed
-        player.walk_left = True
-        player.walk_right = False
-        player.standing = False
+
+        player.move_left()
 
         # background scrolling with player
         background_x1 += background_speed
@@ -146,11 +144,7 @@ while running:
 
     elif keys[pygame.K_RIGHT]:
 
-        if player.rect.x < 300:
-            player.rect.x += player.speed
-        player.walk_left = False
-        player.walk_right = True
-        player.standing = False
+        player.move_right()
 
         # background scrolling with player
         background_x1 -= background_speed
@@ -171,23 +165,7 @@ while running:
         player.standing = True
         player.steps = 0
 
-    # quadratic jumping functionality
-    if not(player.is_jumping):
-        if keys[pygame.K_SPACE]:
-            player.is_jumping = True
-            player.walk_left = False
-            player.walk_right = False
-            player.steps = 0
-    else:
-        if player.jump_length >= -8:
-            multiplier = 1
-            if player.jump_length < 0:
-                multiplier = -1
-            player.rect.bottom -= (player.jump_length ** 2) * 0.5 * multiplier
-            player.jump_length -= 1
-        else:
-            player.is_jumping = False
-            player.jump_length = 8
+    player.jump(keys[pygame.K_UP])
 
     if not(game_over):
         redraw_window(window, player)
