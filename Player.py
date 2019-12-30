@@ -47,3 +47,9 @@ class Player(Entity):
             else:
                 self.image = self.right_standing_list[self.stand_count % 2]
             self.stand_count += 1
+
+    
+    def lose_health(self):
+
+        self.health -= 10
+        

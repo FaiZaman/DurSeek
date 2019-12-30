@@ -25,8 +25,3 @@ class Enemy(Entity):
         self.image = self.left_list[self.steps//3]
         self.steps += 1
         self.rect.x -= self.speed
-
-    
-    def hit(self, player, game_object, game_objects):
-        
-        player.health -= 10

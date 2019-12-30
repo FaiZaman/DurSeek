@@ -9,12 +9,5 @@ class Treasure(Entity):
         super().__init__(1050, 590, self.treasure)
 
 
-    def draw(self, window):
-
-        window.blit(self.treasure, (self.x, self.y))
-        self.hitbox = (self.x, self.y, self.width, self.height)
-        pass
-
-
     def hit(self, player, treasure, game_objects):
         game_objects.pop(game_objects.index(treasure))

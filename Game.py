@@ -28,14 +28,16 @@ clock = pygame.time.Clock()
 
 # create player and sprite groups
 sprites = pygame.sprite.Group()
+treasures = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
+
 player = Player()
 sprites.add(player)
 
-# draws all game_objects to window
+# draws all game objects to window
 def redraw_window(window, player):
 
-    # draw background and background game_objects
+    # draw background and background game objects
     window.blit(background, (background_x1, 0))
     window.blit(background_flipped, (background_x2, 0))
     window.blit(ground, (0, 639))
@@ -95,6 +97,7 @@ while running:
             if spawn_probability > 0.7:
                 treasure = Treasure()
                 game_objects.append(treasure)
+                treasures.add(treasure)
                 sprites.add(treasure)
             elif spawn_probability > 0.3:
                 enemy = Enemy()
@@ -103,14 +106,14 @@ while running:
                 sprites.add(enemy)
 
     # collision detection
-    '''
-    for game_object in game_objects:
-        if player.rect.y - player.height < game_object.hitbox[1] + game_object.hitbox[3] and player.rect.y + player.height > game_object.hitbox[1]:
-            if player.rect.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.rect.x + player.width > game_object.hitbox[0]:                
-                game_object.hit(player, game_object, game_objects)
-                if isinstance(game_object, Treasure):
-                    score += 1
-'''
+    enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
+    if enemy_collisions:
+        player.lose_health()
+
+    treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
+    if treasure_collisions:
+        score += 1
+  
     # check score and health to see if game over
     if score >= win_score:
         game_over = True
