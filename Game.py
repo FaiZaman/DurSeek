@@ -81,6 +81,7 @@ def draw_game_over(window, won):
 # create game object list, object spawn timer, and font
 font = pygame.font.SysFont('comicsans', 30, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
+shootLoop = 0
 game_over = False
 
 # main event loop
@@ -92,10 +93,25 @@ while running:
 
     if game_over:
         draw_game_over(window, won)
+    
+    # projectile cooldown
+    if shootLoop > 0:
+        shootLoop += 1
+    if shootLoop > 3:
+        shootLoop = 0
 
     # projectile movement
     for projectile in projectiles:
         projectile.move()
+        if projectile.rect.x <= projectile.rect.width * -1:
+            projectile.kill()
+        elif projectile.rect.left >= screen_width:
+            projectile.kill()
+
+        projectile_enemy_collisions = pygame.sprite.spritecollide(projectile, enemies, True)
+        if projectile_enemy_collisions:
+            projectile.kill()
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -114,8 +130,8 @@ while running:
                 sprites.add(enemy)
 
     # collision detection
-    enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
-    if enemy_collisions:
+    player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
+    if player_enemy_collisions:
         player.lose_health()
 
     treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
@@ -168,24 +184,27 @@ while running:
             game_object.rect.x -= background_speed
             if game_object.rect.x <= game_object.rect.width * -1:
                 game_object.kill()
-
-    elif keys[pygame.K_SPACE]:
-
-        # create and orient projectile
-        bullet = Projectile(player.rect.x, player.rect.centery)
-        if player.facing_right:
-            bullet.shot_right = True
-        else:
-            bullet.shot_right = False
-
-        projectiles.add(bullet)
-        game_objects.add(bullet)
-        sprites.add(bullet)
-            
     
     else:
         player.standing = True
         player.steps = 0
+
+    # shoot projectiles
+    if keys[pygame.K_SPACE] and shootLoop == 0:
+
+        shootLoop = 1
+
+        # create and orient projectile
+        bullet = Projectile(player.rect.x, player.rect.centery)
+        if len(projectiles) < 5:
+            if player.facing_right:
+                bullet.shot_right = True
+            else:
+                bullet.shot_right = False
+
+            projectiles.add(bullet)
+            game_objects.add(bullet)
+            sprites.add(bullet)
 
     player.jump(keys[pygame.K_UP])
 
