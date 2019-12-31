@@ -27,6 +27,7 @@ class Player(Entity):
         self.walk_left = False
         self.is_jumping = False
         self.jump_length = 8
+        self.facing_right = True
 
     
     def set_image(self):
@@ -55,6 +56,7 @@ class Player(Entity):
         self.walk_left = True
         self.walk_right = False
         self.standing = False
+        self.facing_right = False
     
     
     def move_right(self):
@@ -64,6 +66,7 @@ class Player(Entity):
         self.walk_left = False
         self.walk_right = True
         self.standing = False
+        self.facing_right = True
 
 
     def jump(self, jump_key):

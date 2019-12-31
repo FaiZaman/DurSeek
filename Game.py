@@ -3,6 +3,7 @@ import random as rand
 from Screen import Screen
 from Player import Player
 from Treasure import Treasure
+from Projectile import Projectile
 from Enemy import Enemy
 
 pygame.init()
@@ -31,6 +32,7 @@ sprites = pygame.sprite.Group()
 game_objects = pygame.sprite.Group() # everything but player
 treasures = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
+projectiles = pygame.sprite.Group()
 
 player = Player()
 sprites.add(player)
@@ -56,6 +58,8 @@ def redraw_window(window, player):
     player.set_image()
     for enemy in enemies:
         enemy.set_image()
+    for projectile in projectiles:
+        projectile.set_image()
 
     # draw sprites and refresh display
     sprites.draw(window)
@@ -88,6 +92,10 @@ while running:
 
     if game_over:
         draw_game_over(window, won)
+
+    # projectile movement
+    for projectile in projectiles:
+        projectile.move()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -161,6 +169,20 @@ while running:
             if game_object.rect.x <= game_object.rect.width * -1:
                 game_object.kill()
 
+    elif keys[pygame.K_SPACE]:
+
+        # create and orient projectile
+        bullet = Projectile(player.rect.x, player.rect.centery)
+        if player.facing_right:
+            bullet.shot_right = True
+        else:
+            bullet.shot_right = False
+
+        projectiles.add(bullet)
+        game_objects.add(bullet)
+        sprites.add(bullet)
+            
+    
     else:
         player.standing = True
         player.steps = 0
