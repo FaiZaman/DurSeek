@@ -1,13 +1,12 @@
 import pygame
+from Entity import Entity
 
-class Projectile(object):
+class Projectile(Entity):
 
-    def __init__(self, x, y, width, height):
+    bullet = pygame.image.load("assets/misc/ammo.png")
 
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+    def __init__(self):
+
+        super().__init__(1050, 600, self.bullet)
         self.speed = 10
 
-    

@@ -1,7 +1,8 @@
 import pygame
+from Entity import Entity
 from Player import Player
 
-class Enemy(object):
+class Enemy(Entity):
 
     left_list = [pygame.image.load("assets/enemy/L1.png"), pygame.image.load("assets/enemy/L2.png"),\
                  pygame.image.load("assets/enemy/L3.png"), pygame.image.load("assets/enemy/L4.png"),\
@@ -9,29 +10,18 @@ class Enemy(object):
                  pygame.image.load("assets/enemy/L7.png"), pygame.image.load("assets/enemy/L8.png"),\
                  pygame.image.load("assets/enemy/L9.png"), pygame.image.load("assets/enemy/L10.png")]
 
-    def __init__(self, x, y, width, height):
+    def __init__(self):
         
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.speed = 8
+        super().__init__(1050, 600, self.left_list[0])
+        self.speed = 4
         self.steps = 0
-        self.hitbox = (x, y, width, height)
 
     
-    def draw(self, window):
+    def set_image(self):
         
         if self.steps + 1 > 30:
             self.steps = 0
 
-        window.blit(self.left_list[self.steps//3], (self.x, self.y))
+        self.image = self.left_list[self.steps//3]
         self.steps += 1
-        self.x -= self.speed
-
-        self.hitbox = (self.x, self.y, self.width, self.height)
-
-    
-    def hit(self, player, game_object, game_objects):
-        
-        player.health -= 10
+        self.rect.x -= self.speed

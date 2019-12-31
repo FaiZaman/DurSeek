@@ -20,19 +20,25 @@ background = pygame.image.load("assets/background/background.jpg")
 background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
 background_x1 = 0
 background_x2 = background.get_width()
-background_speed = 10
+background_speed = 5
 
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
 clock = pygame.time.Clock()
 
-# create player
-player = Player(100, 550, 64, 106)
+# create player and sprite groups
+sprites = pygame.sprite.Group()
+game_objects = pygame.sprite.Group() # everything but player
+treasures = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
 
-# draws all game_objects to window
+player = Player()
+sprites.add(player)
+
+# draws all game objects to window
 def redraw_window(window, player):
 
-    # draw background and background game_objects
+    # draw background and background game objects
     window.blit(background, (background_x1, 0))
     window.blit(background_flipped, (background_x2, 0))
     window.blit(ground, (0, 639))
@@ -46,10 +52,13 @@ def redraw_window(window, player):
     pygame.draw.rect(window, (0, 180, 0), (10, 10, player.health * 5, 40))
     pygame.draw.rect(window, (0, 0, 0), (10, 10, 500, 40), 2)
 
-    # draw game objects and update
-    player.draw(window)
-    for game_object in game_objects:
-        game_object.draw(window)
+    # update sprite images
+    player.set_image()
+    for enemy in enemies:
+        enemy.set_image()
+
+    # draw sprites and refresh display
+    sprites.draw(window)
     pygame.display.update()
 
 
@@ -66,7 +75,6 @@ def draw_game_over(window, won):
 
 
 # create game object list, object spawn timer, and font
-game_objects = []
 font = pygame.font.SysFont('comicsans', 30, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
 game_over = False
@@ -87,18 +95,25 @@ while running:
         if event.type == pygame.USEREVENT+1:
             spawn_probability = rand.random()
             if spawn_probability > 0.7:
-                game_objects.append(Treasure(1050, 590, 80, 72))
+                treasure = Treasure()
+                treasures.add(treasure)
+                game_objects.add(treasure)
+                sprites.add(treasure)
             elif spawn_probability > 0.3:
-                game_objects.append(Enemy(1050, 600, 50, 50))
+                enemy = Enemy()
+                enemies.add(enemy)
+                game_objects.add(enemy)
+                sprites.add(enemy)
 
     # collision detection
-    for game_object in game_objects:
-        if player.y - player.height < game_object.hitbox[1] + game_object.hitbox[3] and player.y + player.height > game_object.hitbox[1]:
-            if player.x - player.width < game_object.hitbox[0] + game_object.hitbox[2] and player.x + player.width > game_object.hitbox[0]:                
-                game_object.hit(player, game_object, game_objects)
-                if isinstance(game_object, Treasure):
-                    score += 1
+    enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
+    if enemy_collisions:
+        player.lose_health()
 
+    treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
+    if treasure_collisions:
+        score += 1
+  
     # check score and health to see if game over
     if score >= win_score:
         game_over = True
@@ -110,11 +125,9 @@ while running:
     keys = pygame.key.get_pressed()
         
     # player movement
-    if keys[pygame.K_LEFT] and player.x > player.speed:
-        player.x -= player.speed
-        player.walk_left = True
-        player.walk_right = False
-        player.standing = False
+    if keys[pygame.K_LEFT] and player.rect.x > player.speed:
+
+        player.move_left()
 
         # background scrolling with player
         background_x1 += background_speed
@@ -127,15 +140,11 @@ while running:
 
         # move game objects right
         for game_object in game_objects:
-            game_object.x += background_speed
+            game_object.rect.x += background_speed
 
     elif keys[pygame.K_RIGHT]:
 
-        if player.x < 300:
-            player.x += player.speed
-        player.walk_left = False
-        player.walk_right = True
-        player.standing = False
+        player.move_right()
 
         # background scrolling with player
         background_x1 -= background_speed
@@ -148,31 +157,15 @@ while running:
 
         # move game objects left
         for game_object in game_objects:
-            game_object.x -= background_speed
-            if game_object.x <= game_object.width * -1:
-                game_objects.pop(game_objects.index(game_object))
+            game_object.rect.x -= background_speed
+            if game_object.rect.x <= game_object.rect.width * -1:
+                game_object.kill()
 
     else:
         player.standing = True
         player.steps = 0
 
-    # quadratic jumping functionality
-    if not(player.is_jumping):
-        if keys[pygame.K_SPACE]:
-            player.is_jumping = True
-            player.walk_left = False
-            player.walk_right = False
-            player.steps = 0
-    else:
-        if player.jump_length >= -8:
-            multiplier = 1
-            if player.jump_length < 0:
-                multiplier = -1
-            player.y -= (player.jump_length ** 2) * 0.5 * multiplier
-            player.jump_length -= 1
-        else:
-            player.is_jumping = False
-            player.jump_length = 8
+    player.jump(keys[pygame.K_UP])
 
     if not(game_over):
         redraw_window(window, player)
