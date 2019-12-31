@@ -28,6 +28,7 @@ clock = pygame.time.Clock()
 
 # create player and sprite groups
 sprites = pygame.sprite.Group()
+game_objects = pygame.sprite.Group() # everything but player
 treasures = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 
@@ -74,7 +75,6 @@ def draw_game_over(window, won):
 
 
 # create game object list, object spawn timer, and font
-game_objects = []
 font = pygame.font.SysFont('comicsans', 30, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
 game_over = False
@@ -96,13 +96,13 @@ while running:
             spawn_probability = rand.random()
             if spawn_probability > 0.7:
                 treasure = Treasure()
-                game_objects.append(treasure)
                 treasures.add(treasure)
+                game_objects.add(treasure)
                 sprites.add(treasure)
             elif spawn_probability > 0.3:
                 enemy = Enemy()
-                game_objects.append(enemy)
                 enemies.add(enemy)
+                game_objects.add(enemy)
                 sprites.add(enemy)
 
     # collision detection
@@ -159,7 +159,7 @@ while running:
         for game_object in game_objects:
             game_object.rect.x -= background_speed
             if game_object.rect.x <= game_object.rect.width * -1:
-                game_objects.pop(game_objects.index(game_object))
+                game_object.kill()
 
     else:
         player.standing = True
