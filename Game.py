@@ -22,7 +22,7 @@ background = pygame.image.load("assets/background/background.jpg")
 background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
 background_x1 = 0
 background_x2 = background.get_width()
-background_speed = 5
+background_speed = 10
 
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
@@ -45,7 +45,6 @@ def redraw_window(window, player):
     # draw background and background game objects
     window.blit(background, (background_x1, 0))
     window.blit(background_flipped, (background_x2, 0))
-    #window.blit(ground, (0, 639))
 
     # render the score
     text = font.render('Score: ' + str(score), 1, (0, 0, 0))
@@ -89,6 +88,7 @@ def draw_ground(ground_coords, tx, ty):
     i = 0
     while i < len(ground_coords):
         ground = Platform(ground_coords[i], screen_height - ty)
+        platforms.add(ground)
         game_objects.add(ground)
         sprites.add(ground)
         i += 1
@@ -119,7 +119,7 @@ while running:
     # projectile cooldown
     if shootLoop > 0:
         shootLoop += 1
-    if shootLoop > 3:
+    if shootLoop > 10:
         shootLoop = 0
 
     # projectile movement
@@ -232,7 +232,21 @@ while running:
             sprites.add(bullet)
 
     player.jump(keys[pygame.K_UP])
+
+    # apply gravity to creatures and place them onto platforms
     player.apply_gravity()
+    if player.rect.y > screen_height:
+        player.rect.y = screen_height - player.rect.height * 2
+
+    player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
+    if player_platform_collisions:
+        player.rect.bottom = player_platform_collisions[0].rect.top + 12
+    
+    for enemy in enemies:
+        enemy.apply_gravity()
+        enemy_platform_collisions = pygame.sprite.spritecollide(enemy, platforms, False)
+        if enemy_platform_collisions:
+            enemy.rect.bottom = enemy_platform_collisions[0].rect.top + 12
 
     if not(game_over):
         redraw_window(window, player)

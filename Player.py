@@ -93,6 +93,7 @@ class Player(Entity):
     def apply_gravity(self):
 
         self.rect.y += self.gravity
+        
 
     def lose_health(self):
 
