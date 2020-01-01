@@ -80,6 +80,7 @@ def draw_game_over(window, won):
 
 
 def draw_ground(ground_coords, tx, ty):
+    
     i = 0
     while i <= (screen_width/tx) + tx:
         ground_coords.append(i*tx)
@@ -93,6 +94,20 @@ def draw_ground(ground_coords, tx, ty):
         sprites.add(ground)
         i += 1
 
+
+def draw_platform(platform_coords, width, y_position, tx, ty):
+
+    for i in range(0, width):
+        platform_coords.append(rand.randrange(1000, 1500))
+    
+    for j in range(0, len(platform_coords)):
+        platform = Platform(platform_coords[j], y_position)
+        platform.image = platform.platform
+        platforms.add(platform)
+        game_objects.add(platform)
+        sprites.add(platform)
+
+
 # create ground throughout
 ground_coords = []
 tx = 128
@@ -102,7 +117,7 @@ draw_ground(ground_coords, tx, ty)
 # create game object list, object spawn timer, and font
 font = pygame.font.SysFont('comicsans', 30, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
-pygame.time.set_timer(pygame.USEREVENT+2, 5000)
+pygame.time.set_timer(pygame.USEREVENT+2, 3500)
 shootLoop = 0
 game_over = False
 
@@ -150,9 +165,9 @@ while running:
                 game_objects.add(enemy)
                 sprites.add(enemy)
         if event.type == pygame.USEREVENT+2:
-            platform = Platform(0, 611)
-            game_objects.add(platform)
-            sprites.add(platform)
+            width = rand.randrange(10)
+            y_position = rand.randrange(300, 500)
+            draw_platform([], width, y_position, tx, ty)
 
     # collision detection
     player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
@@ -236,7 +251,8 @@ while running:
     # apply gravity to creatures and place them onto platforms
     player.apply_gravity()
     if player.rect.y > screen_height:
-        player.rect.y = screen_height - player.rect.height * 2
+        game_over = True
+        won = False
 
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
     if player_platform_collisions:

@@ -26,7 +26,7 @@ class Player(Entity):
         self.walk_right = False
         self.walk_left = False
         self.is_jumping = False
-        self.jump_length = 8
+        self.jump_length = 12
         self.facing_right = True
 
     
@@ -79,7 +79,7 @@ class Player(Entity):
                 self.walk_right = False
                 self.steps = 0
         else:
-            if self.jump_length >= -8:
+            if self.jump_length >= -12:
                 multiplier = 1
                 if self.jump_length < 0:
                     multiplier = -1
@@ -87,7 +87,7 @@ class Player(Entity):
                 self.jump_length -= 1
             else:
                 self.is_jumping = False
-                self.jump_length = 8
+                self.jump_length = 12
     
 
     def apply_gravity(self):
