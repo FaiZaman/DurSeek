@@ -80,13 +80,11 @@ def draw_game_over(window, won):
 
 
 def draw_ground(ground_coords, tx, ty):
-    
-    i = 0
-    while i <= (screen_width/tx) + tx:
-        ground_coords.append(i*tx)
-        i += 1
 
+    ground = Platform(0, 0)
+    ground_coords = ground.get_coords_list(ground_coords, tx, ty)
     i = 0
+
     while i < len(ground_coords):
         ground = Platform(ground_coords[i], screen_height - ty)
         platforms.add(ground)
@@ -222,7 +220,7 @@ while running:
         # move game objects left
         for game_object in game_objects:
             game_object.rect.x -= background_speed
-            if game_object.rect.x <= game_object.rect.width * -1:
+            if game_object.rect.x <= game_object.rect.width * -1 and isinstance(game_object, Projectile):
                 game_object.kill()
     
     else:
@@ -236,7 +234,7 @@ while running:
 
         # create and orient projectile
         bullet = Projectile(player.rect.x, player.rect.centery)
-        if len(projectiles) < 5:
+        if len(projectiles) < 3:
             if player.facing_right:
                 bullet.shot_right = True
             else:
@@ -256,6 +254,7 @@ while running:
 
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
     if player_platform_collisions:
+        #for i in range()
         player.rect.bottom = player_platform_collisions[0].rect.top + 12
     
     for enemy in enemies:
