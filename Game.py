@@ -5,6 +5,7 @@ from Player import Player
 from Treasure import Treasure
 from Projectile import Projectile
 from Enemy import Enemy
+from Platform import Platform
 
 pygame.init()
 score = 0
@@ -33,6 +34,7 @@ game_objects = pygame.sprite.Group() # everything but player
 treasures = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 projectiles = pygame.sprite.Group()
+platforms = pygame.sprite.Group()
 
 player = Player()
 sprites.add(player)
@@ -43,7 +45,7 @@ def redraw_window(window, player):
     # draw background and background game objects
     window.blit(background, (background_x1, 0))
     window.blit(background_flipped, (background_x2, 0))
-    window.blit(ground, (0, 639))
+    #window.blit(ground, (0, 639))
 
     # render the score
     text = font.render('Score: ' + str(score), 1, (0, 0, 0))
@@ -78,9 +80,29 @@ def draw_game_over(window, won):
     pygame.display.update()
 
 
+def draw_ground(ground_coords, tx, ty):
+    i = 0
+    while i <= (screen_width/tx) + tx:
+        ground_coords.append(i*tx)
+        i += 1
+
+    i = 0
+    while i < len(ground_coords):
+        ground = Platform(ground_coords[i], screen_height - ty)
+        game_objects.add(ground)
+        sprites.add(ground)
+        i += 1
+
+# create ground throughout
+ground_coords = []
+tx = 128
+ty = 128
+draw_ground(ground_coords, tx, ty)
+
 # create game object list, object spawn timer, and font
 font = pygame.font.SysFont('comicsans', 30, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
+pygame.time.set_timer(pygame.USEREVENT+2, 5000)
 shootLoop = 0
 game_over = False
 
@@ -112,7 +134,6 @@ while running:
         if projectile_enemy_collisions:
             projectile.kill()
 
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -128,6 +149,10 @@ while running:
                 enemies.add(enemy)
                 game_objects.add(enemy)
                 sprites.add(enemy)
+        if event.type == pygame.USEREVENT+2:
+            platform = Platform(0, 611)
+            game_objects.add(platform)
+            sprites.add(platform)
 
     # collision detection
     player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
@@ -207,6 +232,7 @@ while running:
             sprites.add(bullet)
 
     player.jump(keys[pygame.K_UP])
+    player.apply_gravity()
 
     if not(game_over):
         redraw_window(window, player)

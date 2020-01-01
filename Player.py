@@ -17,7 +17,7 @@ class Player(Entity):
 
     def __init__(self):
 
-        super().__init__(100, 550, self.right_standing_list[0])
+        super().__init__(100, 500, self.right_standing_list[0])
         self.speed = 10
         self.steps = 0
         self.health = 100
@@ -89,6 +89,10 @@ class Player(Entity):
                 self.is_jumping = False
                 self.jump_length = 8
     
+
+    def apply_gravity(self):
+
+        self.rect.y += self.gravity
 
     def lose_health(self):
 
