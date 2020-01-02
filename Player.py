@@ -17,7 +17,7 @@ class Player(Entity):
 
     def __init__(self):
 
-        super().__init__(100, 550, self.right_standing_list[0])
+        super().__init__(100, 500, self.right_standing_list[0])
         self.speed = 10
         self.steps = 0
         self.health = 100
@@ -26,7 +26,9 @@ class Player(Entity):
         self.walk_right = False
         self.walk_left = False
         self.is_jumping = False
-        self.jump_length = 8
+        self.jump_length = 12
+        self.facing_right = True
+        self.cooldown = 0
 
     
     def set_image(self):
@@ -51,19 +53,22 @@ class Player(Entity):
 
     def move_left(self):
 
-        self.rect.x -= self.speed
+        if self.rect.x >= 400:
+            self.rect.x -= self.speed
         self.walk_left = True
         self.walk_right = False
         self.standing = False
+        self.facing_right = False
     
     
     def move_right(self):
 
-        if self.rect.x < 300:
+        if self.rect.x < 400:
             self.rect.x += self.speed
         self.walk_left = False
         self.walk_right = True
         self.standing = False
+        self.facing_right = True
 
 
     def jump(self, jump_key):
@@ -76,7 +81,7 @@ class Player(Entity):
                 self.walk_right = False
                 self.steps = 0
         else:
-            if self.jump_length >= -8:
+            if self.jump_length >= -12:
                 multiplier = 1
                 if self.jump_length < 0:
                     multiplier = -1
@@ -84,9 +89,22 @@ class Player(Entity):
                 self.jump_length -= 1
             else:
                 self.is_jumping = False
-                self.jump_length = 8
+                self.jump_length = 12
     
+
+    def apply_gravity(self):
+
+        self.rect.y += self.gravity
+        
 
     def lose_health(self):
 
-        self.health -= 10
+        if self.cooldown > 0:
+            self.cooldown -= 1
+        else:
+            self.cooldown = 10
+            self.health -= 10
+            if self.facing_right:
+                self.rect.x -= 50
+            else:
+                self.rect.x += 50

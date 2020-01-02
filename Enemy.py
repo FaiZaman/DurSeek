@@ -25,3 +25,9 @@ class Enemy(Entity):
         self.image = self.left_list[self.steps//3]
         self.steps += 1
         self.rect.x -= self.speed
+
+
+    def apply_gravity(self):
+
+        self.rect.y += self.gravity
+        
