@@ -104,3 +104,7 @@ class Player(Entity):
         else:
             self.cooldown = 10
             self.health -= 10
+            if self.facing_right:
+                self.rect.x -= 50
+            else:
+                self.rect.x += 50

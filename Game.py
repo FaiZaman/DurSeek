@@ -36,7 +36,7 @@ def redraw_window(window, player):
     window.blit(background_flipped, (background_x2, 0))
 
     # render the score
-    text = font.render('Score: ' + str(score), 1, (0, 0, 0))
+    text = small_font.render('Score: ' + str(score), 1, (0, 0, 0))
     window.blit(text, (10, 60))
 
     # draw health bar
@@ -58,21 +58,26 @@ def redraw_window(window, player):
 
 def draw_game_over(window, starting, won):
 
-    window.fill((255, 255, 255))
+    window.fill((0, 220, 0))
+    play = medium_font.render("Press any key to begin", 1, (128, 0, 128))
+    again = medium_font.render("Press any key to play again", 1, (128, 0, 128))
 
     if starting:
-        title = font.render('DURSEEK', 1, (0, 0, 200))
-        window.blit(title, (450, 100))
+        title = large_font.render('DURSEEK', 1, (128, 0, 128))
+        window.blit(title, (375, 150))
 
-        controls = font.render('Use the arrow keys to move and jump, and space to shoot', 1, (0, 0, 200))
+        controls = small_font.render('Use the arrow keys to move and jump, and space to shoot', 1, (128, 0, 128))
         window.blit(controls, (200, 300))
-    elif won:
-        text = font.render('You Win!', 1, (0, 0, 0))
-        window.blit(text, (screen_width / 2, screen_height / 2 ))
+        window.blit(play, (300, 400))
     else:
-        text = font.render('You Lose!', 1, (0, 0, 0))
-        window.blit(text, (screen_width / 2, screen_height / 2 ))
-    
+        if won:
+            text = medium_font.render('You Win!', 1, (128, 0, 128))
+            window.blit(text, (420, 200))
+        else:
+            text = medium_font.render('You Lose!', 1, (128, 0, 128))
+            window.blit(text, (420, 200))
+        window.blit(again, (300, 400))
+        
     pygame.display.update()
     
     waiting = True
@@ -119,7 +124,9 @@ tx = 128
 ty = 128
 
 # create game object list, object spawn timer, and font
-font = pygame.font.SysFont('comicsans', 30, True)
+small_font = pygame.font.SysFont('comicsans', 30, True)
+medium_font = pygame.font.SysFont('comicsans', 45, True)
+large_font = pygame.font.SysFont('comicsans', 75, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
 pygame.time.set_timer(pygame.USEREVENT+2, 3500)
 shootLoop = 0
