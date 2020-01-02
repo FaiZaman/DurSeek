@@ -28,6 +28,7 @@ class Player(Entity):
         self.is_jumping = False
         self.jump_length = 12
         self.facing_right = True
+        self.cooldown = 0
 
     
     def set_image(self):
@@ -98,4 +99,8 @@ class Player(Entity):
 
     def lose_health(self):
 
-        self.health -= 10
+        if self.cooldown > 0:
+            self.cooldown -= 1
+        else:
+            self.cooldown = 10
+            self.health -= 10

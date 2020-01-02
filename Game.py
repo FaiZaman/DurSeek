@@ -124,10 +124,7 @@ running = True
 while running:
 
     # clock speed and event detection
-    clock.tick(36)
-
-    if game_over:
-        draw_game_over(window, won)
+    clock.tick(60)
     
     # projectile cooldown
     if shootLoop > 0:
@@ -152,12 +149,12 @@ while running:
             running = False
         if event.type == pygame.USEREVENT+1:
             spawn_probability = rand.random()
-            if spawn_probability > 0.7:
+            if spawn_probability > 0.8:
                 treasure = Treasure()
                 treasures.add(treasure)
                 game_objects.add(treasure)
                 sprites.add(treasure)
-            elif spawn_probability > 0.3:
+            elif spawn_probability > 0.2:
                 enemy = Enemy()
                 enemies.add(enemy)
                 game_objects.add(enemy)
@@ -165,7 +162,7 @@ while running:
         if event.type == pygame.USEREVENT+2:
             width = rand.randrange(10)
             y_position = rand.randrange(300, 500)
-            draw_platform([], width, y_position, tx, ty)
+            draw_platform([], width, y_position, 128, 32)
 
     # collision detection
     player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
@@ -254,16 +251,32 @@ while running:
 
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
     if player_platform_collisions:
-        #for i in range()
-        player.rect.bottom = player_platform_collisions[0].rect.top + 12
-    
+        highest_y = 0
+        for platform in player_platform_collisions:
+            if platform.rect.top > highest_y:
+                highest_y = platform.rect.top
+        if player.rect.y < highest_y:
+            player.rect.bottom = highest_y + 12
+
     for enemy in enemies:
         enemy.apply_gravity()
         enemy_platform_collisions = pygame.sprite.spritecollide(enemy, platforms, False)
         if enemy_platform_collisions:
-            enemy.rect.bottom = enemy_platform_collisions[0].rect.top + 12
+            highest_y = 0
+            for platform in enemy_platform_collisions:
+                if platform.rect.top > highest_y:
+                    highest_y = platform.rect.top
+            enemy.rect.bottom = highest_y + 12
 
-    if not(game_over):
+    if game_over:
+        draw_game_over(window, won)
+        if keys[pygame.K_RETURN]:
+            game_over = False
+            score = 0
+            player.health = 100
+            player.rect.x = 100
+            player.rect.y = 500
+    else:
         redraw_window(window, player)
 
 pygame.quit()
