@@ -28,17 +28,6 @@ background_speed = 10
 ground = pygame.image.load("assets/background/ground.png")
 clock = pygame.time.Clock()
 
-# create player and sprite groups
-sprites = pygame.sprite.Group()
-game_objects = pygame.sprite.Group() # everything but player
-treasures = pygame.sprite.Group()
-enemies = pygame.sprite.Group()
-projectiles = pygame.sprite.Group()
-platforms = pygame.sprite.Group()
-
-player = Player()
-sprites.add(player)
-
 # draws all game objects to window
 def redraw_window(window, player):
 
@@ -67,16 +56,34 @@ def redraw_window(window, player):
     pygame.display.update()
 
 
-def draw_game_over(window, won):
+def draw_game_over(window, starting, won):
 
-    if won:
+    window.fill((255, 255, 255))
+
+    if starting:
+        title = font.render('DURSEEK', 1, (0, 0, 200))
+        window.blit(title, (450, 100))
+
+        controls = font.render('Use the arrow keys to move and jump, and space to shoot', 1, (0, 0, 200))
+        window.blit(controls, (200, 300))
+    elif won:
         text = font.render('You Win!', 1, (0, 0, 0))
+        window.blit(text, (screen_width / 2, screen_height / 2 ))
     else:
         text = font.render('You Lose!', 1, (0, 0, 0))
+        window.blit(text, (screen_width / 2, screen_height / 2 ))
     
-    window.fill((255, 255, 255))
-    window.blit(text, (450, 300))
     pygame.display.update()
+    
+    waiting = True
+    while waiting:
+        clock.tick(60)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYUP:
+                waiting = False
 
 
 def draw_ground(ground_coords, tx, ty):
@@ -110,18 +117,36 @@ def draw_platform(platform_coords, width, y_position, tx, ty):
 ground_coords = []
 tx = 128
 ty = 128
-draw_ground(ground_coords, tx, ty)
 
 # create game object list, object spawn timer, and font
 font = pygame.font.SysFont('comicsans', 30, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 3000)
 pygame.time.set_timer(pygame.USEREVENT+2, 3500)
 shootLoop = 0
-game_over = False
+game_over = True
+starting = True
+won = False
 
 # main event loop
 running = True
 while running:
+
+    if game_over:
+        draw_game_over(window, starting, won)
+        game_over = False
+        starting = False
+        
+        # create player and sprite groups
+        sprites = pygame.sprite.Group()
+        game_objects = pygame.sprite.Group() # everything but player
+        treasures = pygame.sprite.Group()
+        enemies = pygame.sprite.Group()
+        projectiles = pygame.sprite.Group()
+        platforms = pygame.sprite.Group()
+        draw_ground(ground_coords, tx, ty)
+
+        player = Player()
+        sprites.add(player)
 
     # clock speed and event detection
     clock.tick(60)
@@ -268,15 +293,7 @@ while running:
                     highest_y = platform.rect.top
             enemy.rect.bottom = highest_y + 12
 
-    if game_over:
-        draw_game_over(window, won)
-        if keys[pygame.K_RETURN]:
-            game_over = False
-            score = 0
-            player.health = 100
-            player.rect.x = 100
-            player.rect.y = 500
-    else:
+    if not(game_over):
         redraw_window(window, player)
 
 pygame.quit()
