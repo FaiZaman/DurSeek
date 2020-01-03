@@ -10,7 +10,7 @@ from Platform import Platform
 pygame.init()
 score = 0
 win_score = 5
-fps = 50
+fps = 40
 
 # create game window and clock
 screen_width = 1000
@@ -109,7 +109,7 @@ def draw_ground(ground_coords, tx, ty):
 def draw_platform(platform_coords, width, y_position, tx, ty):
 
     for i in range(0, width):
-        platform_coords.append(rand.randrange(1000, 1500))
+        platform_coords.append(rand.randrange(1300, 1700))
     
     for j in range(0, len(platform_coords)):
         platform = Platform(platform_coords[j], y_position)
@@ -139,6 +139,7 @@ won = False
 # main event loop
 running = True
 while running:
+    print("FPS:", int(clock.get_fps()))
 
     if game_over:
         draw_game_over(window, starting, won)
@@ -181,25 +182,28 @@ while running:
         if projectile_enemy_collisions:
             projectile.kill()
 
+    keys = pygame.key.get_pressed()
+
     for event in pygame.event.get():
-        spawn_probability = rand.random()
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.USEREVENT+1:
-            if spawn_probability > 0.5:
-                treasure = Treasure(1500, rand.randrange(0, 400))
-                treasures.add(treasure)
-                game_objects.add(treasure)
-                sprites.add(treasure)
-        if event.type == pygame.USEREVENT+2:
-                enemy = Enemy(1500, rand.randrange(0, 400))
-                enemies.add(enemy)
-                game_objects.add(enemy)
-                sprites.add(enemy)
-        if event.type == pygame.USEREVENT+3:
-            width = rand.randrange(15)
-            y_position = rand.randrange(300, 500)
-            draw_platform([], width, y_position, 128, 32)
+        if keys[pygame.K_RIGHT]:
+            spawn_probability = rand.random()
+            if event.type == pygame.USEREVENT+1:
+                if spawn_probability > 0.5:
+                    treasure = Treasure(1500, rand.randrange(0, 400))
+                    treasures.add(treasure)
+                    game_objects.add(treasure)
+                    sprites.add(treasure)
+            if event.type == pygame.USEREVENT+2:
+                    enemy = Enemy(1500, rand.randrange(0, 400))
+                    enemies.add(enemy)
+                    game_objects.add(enemy)
+                    sprites.add(enemy)
+            if event.type == pygame.USEREVENT+3:
+                width = rand.randrange(15)
+                y_position = rand.randrange(300, 500)
+                draw_platform([], width, y_position, 128, 32)
 
     # collision detection
     player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
@@ -217,9 +221,7 @@ while running:
     elif player.health == 0:
         game_over = True
         won = False
-   
-    keys = pygame.key.get_pressed()
-        
+           
     # player movement
     if keys[pygame.K_LEFT] and player.rect.x > player.speed:
 
