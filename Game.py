@@ -10,6 +10,7 @@ from Platform import Platform
 pygame.init()
 score = 0
 win_score = 5
+fps = 50
 
 # create game window and clock
 screen_width = 1000
@@ -82,7 +83,7 @@ def draw_game_over(window, starting, won):
     
     waiting = True
     while waiting:
-        clock.tick(60)
+        clock.tick(fps)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -156,7 +157,7 @@ while running:
         sprites.add(player)
 
     # clock speed and event detection
-    clock.tick(60)
+    clock.tick(fps)
     
     # projectile cooldown
     if shootLoop > 0:

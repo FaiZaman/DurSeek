@@ -13,6 +13,7 @@ class Player(Entity):
                 pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
 
     left_standing_list = [pygame.image.load("assets/character/standing/standing_L1.png"), pygame.image.load("assets/character/standing/standing_L2.png")]
+
     right_standing_list = [pygame.image.load("assets/character/standing/standing_R1.png"), pygame.image.load("assets/character/standing/standing_R2.png")]
 
     def __init__(self):
@@ -29,9 +30,14 @@ class Player(Entity):
         self.jump_length = 12
         self.facing_right = True
         self.cooldown = 0
-
+        self.tinted = False
+        self.tint_scale = 0.5
+        self.knockback = 50
+    
     
     def set_image(self):
+
+        self.untint()
 
         if self.steps + 1 > 18:
             self.steps = 0
@@ -49,6 +55,10 @@ class Player(Entity):
             else:
                 self.image = self.right_standing_list[self.stand_count % 2]
             self.stand_count += 1
+        
+        if self.tinted:
+            self.tint()
+            self.tinted = False
 
 
     def move_left(self):
@@ -105,6 +115,21 @@ class Player(Entity):
             self.cooldown = 10
             self.health -= 10
             if self.facing_right:
-                self.rect.x -= 50
+                self.rect.x -= self.knockback
             else:
-                self.rect.x += 50
+                self.rect.x += self.knockback
+            self.tinted = True
+
+
+    def tint(self):
+
+        GB = min(255, max(0, round(255 * (1 - self.tint_scale))))
+        self.saved_image = self.image
+        self.image.fill((255, GB, GB), special_flags = pygame.BLEND_MULT)
+
+
+    def untint(self):
+        
+        if self.saved_image != "":
+            self.image = self.saved_image
+            self.saved_image = ""
