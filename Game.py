@@ -128,8 +128,9 @@ ty = 128
 small_font = pygame.font.SysFont('comicsans', 30, True)
 medium_font = pygame.font.SysFont('comicsans', 45, True)
 large_font = pygame.font.SysFont('comicsans', 75, True)
-pygame.time.set_timer(pygame.USEREVENT+1, 3000)
-pygame.time.set_timer(pygame.USEREVENT+2, 3500)
+pygame.time.set_timer(pygame.USEREVENT+1, 10000)
+pygame.time.set_timer(pygame.USEREVENT+2, 2000)
+pygame.time.set_timer(pygame.USEREVENT+3, 3500)
 shootLoop = 0
 game_over = True
 starting = True
@@ -156,6 +157,9 @@ while running:
         player = Player()
         sprites.add(player)
 
+        player.health = 100
+        score = 0
+
     # clock speed and event detection
     clock.tick(fps)
     
@@ -178,22 +182,22 @@ while running:
             projectile.kill()
 
     for event in pygame.event.get():
+        spawn_probability = rand.random()
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.USEREVENT+1:
-            spawn_probability = rand.random()
-            if spawn_probability > 0.8:
-                treasure = Treasure()
+            if spawn_probability > 0.5:
+                treasure = Treasure(1500, rand.randrange(0, 400))
                 treasures.add(treasure)
                 game_objects.add(treasure)
                 sprites.add(treasure)
-            elif spawn_probability > 0.2:
-                enemy = Enemy()
+        if event.type == pygame.USEREVENT+2:
+                enemy = Enemy(1500, rand.randrange(0, 400))
                 enemies.add(enemy)
                 game_objects.add(enemy)
                 sprites.add(enemy)
-        if event.type == pygame.USEREVENT+2:
-            width = rand.randrange(10)
+        if event.type == pygame.USEREVENT+3:
+            width = rand.randrange(15)
             y_position = rand.randrange(300, 500)
             draw_platform([], width, y_position, 128, 32)
 
@@ -283,23 +287,17 @@ while running:
         won = False
 
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
-    if player_platform_collisions:
-        highest_y = 0
-        for platform in player_platform_collisions:
-            if platform.rect.top > highest_y:
-                highest_y = platform.rect.top
-        if player.rect.y < highest_y:
-            player.rect.bottom = highest_y + 12
+    player.platform_collision_handling(player, player_platform_collisions)
 
     for enemy in enemies:
         enemy.apply_gravity()
         enemy_platform_collisions = pygame.sprite.spritecollide(enemy, platforms, False)
-        if enemy_platform_collisions:
-            highest_y = 0
-            for platform in enemy_platform_collisions:
-                if platform.rect.top > highest_y:
-                    highest_y = platform.rect.top
-            enemy.rect.bottom = highest_y + 12
+        enemy.platform_collision_handling(enemy, enemy_platform_collisions)
+
+    for treasure in treasures:
+        treasure.apply_gravity()
+        treasure_platform_collisions = pygame.sprite.spritecollide(treasure, platforms, False)
+        treasure.platform_collision_handling(treasure, treasure_platform_collisions)
 
     if not(game_over):
         redraw_window(window, player)

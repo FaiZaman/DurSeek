@@ -34,10 +34,8 @@ class Player(Entity):
         self.tint_scale = 0.5
         self.knockback = 50
     
-    
-    def set_image(self):
 
-        self.untint()
+    def set_image(self):
 
         if self.steps + 1 > 18:
             self.steps = 0
@@ -100,11 +98,6 @@ class Player(Entity):
             else:
                 self.is_jumping = False
                 self.jump_length = 12
-    
-
-    def apply_gravity(self):
-
-        self.rect.y += self.gravity
         
 
     def lose_health(self):
@@ -124,12 +117,4 @@ class Player(Entity):
     def tint(self):
 
         GB = min(255, max(0, round(255 * (1 - self.tint_scale))))
-        self.saved_image = self.image
         self.image.fill((255, GB, GB), special_flags = pygame.BLEND_MULT)
-
-
-    def untint(self):
-        
-        if self.saved_image != "":
-            self.image = self.saved_image
-            self.saved_image = ""

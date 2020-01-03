@@ -1,6 +1,5 @@
 import pygame
 from Entity import Entity
-from Player import Player
 
 class Enemy(Entity):
 
@@ -10,9 +9,9 @@ class Enemy(Entity):
                  pygame.image.load("assets/enemy/L7.png"), pygame.image.load("assets/enemy/L8.png"),\
                  pygame.image.load("assets/enemy/L9.png"), pygame.image.load("assets/enemy/L10.png")]
 
-    def __init__(self):
+    def __init__(self, x, y):
         
-        super().__init__(1050, 600, self.left_list[0])
+        super().__init__(x, y, self.left_list[0])
         self.speed = 4
         self.steps = 0
 
@@ -25,9 +24,4 @@ class Enemy(Entity):
         self.image = self.left_list[self.steps//3]
         self.steps += 1
         self.rect.x -= self.speed
-
-
-    def apply_gravity(self):
-
-        self.rect.y += self.gravity
         
