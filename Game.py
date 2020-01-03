@@ -139,7 +139,6 @@ won = False
 # main event loop
 running = True
 while running:
-    print("FPS:", int(clock.get_fps()))
 
     if game_over:
         draw_game_over(window, starting, won)
@@ -269,16 +268,16 @@ while running:
         shootLoop = 1
 
         # create and orient projectile
-        bullet = Projectile(player.rect.x, player.rect.centery)
+        fireball = Projectile(player.rect.left - 70, player.rect.centery - 30)
         if len(projectiles) < 3:
             if player.facing_right:
-                bullet.shot_right = True
+                fireball.shot_right = True
             else:
-                bullet.shot_right = False
+                fireball.shot_right = False
 
-            projectiles.add(bullet)
-            game_objects.add(bullet)
-            sprites.add(bullet)
+            projectiles.add(fireball)
+            game_objects.add(fireball)
+            sprites.add(fireball)
 
     player.jump(keys[pygame.K_UP])
 
