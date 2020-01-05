@@ -23,7 +23,7 @@ background = pygame.image.load("assets/background/background.jpg")
 background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
 background_x1 = 0
 background_x2 = background.get_width()
-background_speed = 10
+background_speed = 50
 
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
@@ -96,20 +96,22 @@ def draw_ground(ground_coords, tx, ty):
 
     ground = Platform(0, 0)
     ground_coords = ground.get_coords_list(ground_coords, tx, ty)
-    i = 0
 
-    while i < len(ground_coords):
+    for i in range(0, len(ground_coords)):
         ground = Platform(ground_coords[i], screen_height - ty)
         platforms.add(ground)
         game_objects.add(ground)
         sprites.add(ground)
-        i += 1
+        if i >= 2:
+            if ground_coords[i] - 128 != ground_coords[i - 1] and ground_coords[i] - 256 != ground_coords[i - 2]:
+                draw_platform([ground_coords[i - 1]], rand.randrange(15), rand.randrange(300, 500), 128, 32)
 
 
 def draw_platform(platform_coords, width, y_position, tx, ty):
 
-    for i in range(0, width):
-        platform_coords.append(rand.randrange(1300, 1700))
+    if platform_coords == []:
+        for i in range(0, width):
+            platform_coords.append(rand.randrange(1300, 1700))
     
     for j in range(0, len(platform_coords)):
         platform = Platform(platform_coords[j], y_position)
@@ -133,6 +135,7 @@ pygame.time.set_timer(pygame.USEREVENT+2, 2000)
 pygame.time.set_timer(pygame.USEREVENT+3, 3500)
 shootLoop = 0
 game_over = True
+first_game = True
 starting = True
 won = False
 
@@ -152,7 +155,9 @@ while running:
         enemies = pygame.sprite.Group()
         projectiles = pygame.sprite.Group()
         platforms = pygame.sprite.Group()
-        draw_ground(ground_coords, tx, ty)
+        if first_game:
+            draw_ground(ground_coords, tx, ty)
+            print("drawn")
 
         player = Player()
         sprites.add(player)
@@ -177,9 +182,13 @@ while running:
         elif projectile.rect.left >= screen_width:
             projectile.kill()
 
-        projectile_enemy_collisions = pygame.sprite.spritecollide(projectile, enemies, True)
+        projectile_enemy_collisions = pygame.sprite.spritecollide(projectile, enemies, False)
         if projectile_enemy_collisions:
             projectile.kill()
+            for enemy in projectile_enemy_collisions:
+                enemy.exploding = True
+                enemy.rect.x -= 50
+                enemy.rect.y -= 50
 
     keys = pygame.key.get_pressed()
 
@@ -207,7 +216,9 @@ while running:
     # collision detection
     player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
     if player_enemy_collisions:
-        player.lose_health()
+        for enemy in enemies:
+            if not(enemy.exploding):
+                player.lose_health()
 
     treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
     if treasure_collisions:
@@ -217,9 +228,11 @@ while running:
     if score >= win_score:
         game_over = True
         won = True
+        first_game = False
     elif player.health == 0:
         game_over = True
         won = False
+        first_game = False
            
     # player movement
     if keys[pygame.K_LEFT] and player.rect.x > player.speed:
@@ -286,6 +299,7 @@ while running:
     if player.rect.y > screen_height:
         game_over = True
         won = False
+        first_game = False
 
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
     player.platform_collision_handling(player, player_platform_collisions)
