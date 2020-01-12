@@ -18,7 +18,7 @@ class Platform(Entity):
         no_ground_list = []
 
         i = 0
-        while i <= (1000/tx) + tx:
+        while i <= (20000/tx) + tx:
             ground_spawn = rand.random()
             if ground_spawn > 0.2 or i == 0:
                 ground_coords.append(i*tx)

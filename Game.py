@@ -6,10 +6,11 @@ from Treasure import Treasure
 from Projectile import Projectile
 from Enemy import Enemy
 from Platform import Platform
+from Upgrades import Heart
 
 pygame.init()
 score = 0
-win_score = 5
+win_score = 10
 fps = 40
 
 # create game window and clock
@@ -33,6 +34,7 @@ pygame.mixer.music.load('assets/sound/game_theme.mp3')
 treasure_sound = pygame.mixer.Sound('assets/sound/treasure.wav')
 explosion_sound = pygame.mixer.Sound('assets/sound/explosion.wav')
 fireball_sound = pygame.mixer.Sound('assets/sound/fireball.wav')
+health_sound = pygame.mixer.Sound('assets/sound/health.wav')
 damage_sound = pygame.mixer.Sound('assets/sound/damage.wav')
 death_sound = pygame.mixer.Sound('assets/sound/death.wav')
 
@@ -112,7 +114,7 @@ def draw_ground(ground_coords, tx, ty):
         sprites.add(ground)
     
     for j in range(0, len(no_ground_list)):
-        draw_platform([no_ground_list[j]], rand.randrange(5), rand.randrange(475, 550), 128, 32)
+        draw_platform([no_ground_list[j]], rand.randrange(5), rand.randrange(500, 540), 128, 32)
 
 
 def draw_platform(platform_coords, width, y_position, tx, ty):
@@ -159,10 +161,12 @@ while running:
         # create player and sprite groups
         sprites = pygame.sprite.Group()
         game_objects = pygame.sprite.Group() # everything but player
+        gravitons = pygame.sprite.Group() # everything gravity is applied to except for player
         treasures = pygame.sprite.Group()
         enemies = pygame.sprite.Group()
         projectiles = pygame.sprite.Group()
         platforms = pygame.sprite.Group()
+        hearts = pygame.sprite.Group()
         if not first_game:
             ground_coords = []
         draw_ground(ground_coords, tx, ty)
@@ -211,13 +215,15 @@ while running:
             spawn_probability = rand.random()
             if event.type == pygame.USEREVENT+1:
                 if spawn_probability > 0.5:
-                    treasure = Treasure(1500, rand.randrange(0, 400))
+                    treasure = Treasure(1500, rand.randrange(0, 200))
                     treasures.add(treasure)
+                    gravitons.add(treasure)
                     game_objects.add(treasure)
                     sprites.add(treasure)
             if event.type == pygame.USEREVENT+2:
-                    enemy = Enemy(1500, rand.randrange(0, 400))
+                    enemy = Enemy(1500, rand.randrange(0, 200))
                     enemies.add(enemy)
+                    gravitons.add(enemy)
                     game_objects.add(enemy)
                     sprites.add(enemy)
             if event.type == pygame.USEREVENT+3:
@@ -230,15 +236,35 @@ while running:
     if player_enemy_collisions:
         for enemy in player_enemy_collisions:
             if not(enemy.exploding):
-                lost_health = player.lose_health()
-                if lost_health:
-                    damage_sound.play()
+                player.lose_health()
+                damage_sound.play()
+
+    player_heart_collisions = pygame.sprite.spritecollide(player, hearts, True)
+    if player_heart_collisions:
+        health_sound.play()
+        player.health += 50
+        if player.health > 100:
+            player.health = 100
 
     treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
     if treasure_collisions:
         treasure_sound.play()
         score += 1
         background_speed += 2
+        if score >= 8:
+            pygame.time.set_timer(pygame.USEREVENT+2, 400)
+        elif score >= 6:
+            pygame.time.set_timer(pygame.USEREVENT+2, 800)
+        elif score >= 4:
+            pygame.time.set_timer(pygame.USEREVENT+2, 1200)
+        elif score >= 2:
+            pygame.time.set_timer(pygame.USEREVENT+2, 1500)
+            heart = Heart(1500, rand.randrange(0, 300))
+            heart.rect.y -= 50
+            hearts.add(heart)
+            gravitons.add(heart)
+            game_objects.add(heart)
+            sprites.add(heart)
   
     # check score and health to see if game over
     if score >= win_score:
@@ -323,15 +349,10 @@ while running:
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
     player.player_platform_collision_handling(player_platform_collisions)
 
-    for enemy in enemies:
-        enemy.apply_gravity()
-        enemy_platform_collisions = pygame.sprite.spritecollide(enemy, platforms, False)
-        enemy.platform_collision_handling(enemy_platform_collisions)
-
-    for treasure in treasures:
-        treasure.apply_gravity()
-        treasure_platform_collisions = pygame.sprite.spritecollide(treasure, platforms, False)
-        treasure.platform_collision_handling(treasure_platform_collisions)
+    for graviton in gravitons:
+        graviton.apply_gravity()
+        graviton_platform_collisions = pygame.sprite.spritecollide(graviton, platforms, False)
+        graviton.platform_collision_handling(graviton_platform_collisions)
 
     if not(game_over):
         redraw_window(window, player)

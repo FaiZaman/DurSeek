@@ -30,7 +30,6 @@ class Player(Entity):
         self.falling = False
         self.on_ground = True
         self.facing_right = True
-        self.cooldown = 0
         self.knockback = 100
     
 
@@ -101,20 +100,11 @@ class Player(Entity):
 
     def lose_health(self):
 
-        lost_health = False
-
-        if self.cooldown > 0:
-            self.cooldown -= 1
+        self.health -= 10
+        if self.facing_right:
+            self.rect.x -= self.knockback
         else:
-            self.cooldown = 10
-            self.health -= 10
-            lost_health = True
-            if self.facing_right:
-                self.rect.x -= self.knockback
-            else:
-                self.rect.x += self.knockback
-
-        return lost_health
+            self.rect.x += self.knockback
 
 
     def player_platform_collision_handling(self, collisions):
