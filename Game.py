@@ -29,6 +29,14 @@ background_speed = 10
 ground = pygame.image.load("assets/background/ground.png")
 clock = pygame.time.Clock()
 
+# load in music and sound effects
+pygame.mixer.music.load('assets/sound/game_theme.mp3')
+treasure_sound = pygame.mixer.Sound('assets/sound/treasure.wav')
+explosion_sound = pygame.mixer.Sound('assets/sound/explosion.wav')
+fireball_sound = pygame.mixer.Sound('assets/sound/fireball.wav')
+damage_sound = pygame.mixer.Sound('assets/sound/damage.wav')
+death_sound = pygame.mixer.Sound('assets/sound/death.wav')
+
 # draws all game objects to window
 def redraw_window(window, player):
 
@@ -59,6 +67,7 @@ def redraw_window(window, player):
 
 def draw_game_over(window, starting, won):
 
+    pygame.mixer.music.stop()
     window.fill((0, 220, 0))
     play = medium_font.render("Press any key to begin", 1, (128, 0, 128))
     again = medium_font.render("Press any key to play again", 1, (128, 0, 128))
@@ -104,7 +113,7 @@ def draw_ground(ground_coords, tx, ty):
         sprites.add(ground)
         if i >= 2:
             if ground_coords[i] - 128 != ground_coords[i - 1] and ground_coords[i] - 256 != ground_coords[i - 2]:
-                draw_platform([ground_coords[i - 1]], rand.randrange(15), rand.randrange(300, 500), 128, 32)
+                draw_platform([ground_coords[i - 2]], rand.randrange(15), rand.randrange(300, 550), 128, 32)
 
 
 def draw_platform(platform_coords, width, y_position, tx, ty):
@@ -165,6 +174,8 @@ while running:
         player.health = 100
         score = 0
 
+        pygame.mixer.music.play(-1)
+
     # clock speed and event detection
     clock.tick(fps)
     
@@ -186,6 +197,7 @@ while running:
         if projectile_enemy_collisions:
             projectile.kill()
             for enemy in projectile_enemy_collisions:
+                explosion_sound.play()
                 enemy.exploding = True
                 enemy.rect.x -= 50
                 enemy.rect.y -= 50
@@ -210,7 +222,7 @@ while running:
                     sprites.add(enemy)
             if event.type == pygame.USEREVENT+3:
                 width = rand.randrange(15)
-                y_position = rand.randrange(300, 500)
+                y_position = rand.randrange(300, 550)
                 draw_platform([], width, y_position, 128, 32)
 
     # collision detection
@@ -218,10 +230,13 @@ while running:
     if player_enemy_collisions:
         for enemy in enemies:
             if not(enemy.exploding):
-                player.lose_health()
+                lost_health = player.lose_health()
+                if lost_health:
+                    damage_sound.play()
 
     treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
     if treasure_collisions:
+        treasure_sound.play()
         score += 1
   
     # check score and health to see if game over
@@ -233,6 +248,7 @@ while running:
         game_over = True
         won = False
         first_game = False
+        death_sound.play()
            
     # player movement
     if keys[pygame.K_LEFT] and player.rect.x > player.speed:
@@ -282,6 +298,7 @@ while running:
 
         # create and orient projectile
         fireball = Projectile(player.rect.left - 70, player.rect.centery - 30)
+        fireball_sound.play()
         if len(projectiles) < 3:
             if player.facing_right:
                 fireball.shot_right = True
@@ -294,12 +311,13 @@ while running:
 
     player.jump(keys[pygame.K_UP])
 
-    # apply gravity to creatures and place them onto platforms
+    # endgame if player fell off screen
     player.apply_gravity()
     if player.rect.y > screen_height:
         game_over = True
         won = False
         first_game = False
+        death_sound.play()
 
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
     player.player_platform_collision_handling(player_platform_collisions)

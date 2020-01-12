@@ -13,7 +13,6 @@ class Player(Entity):
                 pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
 
     left_standing_list = [pygame.image.load("assets/character/standing/standing_L1.png"), pygame.image.load("assets/character/standing/standing_L2.png")]
-
     right_standing_list = [pygame.image.load("assets/character/standing/standing_R1.png"), pygame.image.load("assets/character/standing/standing_R2.png")]
 
     def __init__(self):
@@ -108,16 +107,21 @@ class Player(Entity):
 
     def lose_health(self):
 
+        lost_health = False
+
         if self.cooldown > 0:
             self.cooldown -= 1
         else:
             self.cooldown = 10
             self.health -= 10
+            lost_health = True
             if self.facing_right:
                 self.rect.x -= self.knockback
             else:
                 self.rect.x += self.knockback
             self.tinted = True
+
+        return lost_health
 
 
     def tint(self):
@@ -135,3 +139,4 @@ class Player(Entity):
                     highest_y = platform.rect.top
             if (self.rect.y < highest_y and self.falling) or (self.rect.y < highest_y and self.on_ground):
                 self.rect.bottom = highest_y + 12
+                self.on_ground = True
