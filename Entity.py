@@ -17,12 +17,12 @@ class Entity(pygame.sprite.Sprite):
         self.rect.y += self.gravity
         
 
-    def platform_collision_handling(self, entity, collisions):
+    def platform_collision_handling(self, collisions):
 
         if collisions:
             highest_y = 0
             for platform in collisions:
                 if platform.rect.top > highest_y:
                     highest_y = platform.rect.top
-            if entity.rect.y < highest_y:
-                entity.rect.bottom = highest_y + 12 
+            if self.rect.y < highest_y:
+                self.rect.bottom = highest_y + 12 

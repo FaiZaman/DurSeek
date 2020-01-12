@@ -29,6 +29,7 @@ class Player(Entity):
         self.is_jumping = False
         self.jump_length = 12
         self.falling = False
+        self.on_ground = True
         self.facing_right = True
         self.cooldown = 0
         self.tinted = False
@@ -85,11 +86,13 @@ class Player(Entity):
         # quadratic jumping functionality
         if not(self.is_jumping):
             self.falling = False
+            self.on_ground = True
             if jump_key:
                 self.is_jumping = True
                 self.walk_left = False
                 self.walk_right = False
                 self.steps = 0
+                self.on_ground = False
         else:
             if self.jump_length >= -12:
                 multiplier = 1
@@ -121,3 +124,14 @@ class Player(Entity):
 
         GB = min(255, max(0, round(255 * (1 - self.tint_scale))))
         self.image.fill((255, GB, GB), special_flags = pygame.BLEND_MULT)
+
+
+    def player_platform_collision_handling(self, collisions):
+
+        if collisions:
+            highest_y = 0
+            for platform in collisions:
+                if platform.rect.top > highest_y:
+                    highest_y = platform.rect.top
+            if (self.rect.y < highest_y and self.falling) or (self.rect.y < highest_y and self.on_ground):
+                self.rect.bottom = highest_y + 12

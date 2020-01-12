@@ -302,17 +302,17 @@ while running:
         first_game = False
 
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
-    player.platform_collision_handling(player, player_platform_collisions)
+    player.player_platform_collision_handling(player_platform_collisions)
 
     for enemy in enemies:
         enemy.apply_gravity()
         enemy_platform_collisions = pygame.sprite.spritecollide(enemy, platforms, False)
-        enemy.platform_collision_handling(enemy, enemy_platform_collisions)
+        enemy.platform_collision_handling(enemy_platform_collisions)
 
     for treasure in treasures:
         treasure.apply_gravity()
         treasure_platform_collisions = pygame.sprite.spritecollide(treasure, platforms, False)
-        treasure.platform_collision_handling(treasure, treasure_platform_collisions)
+        treasure.platform_collision_handling(treasure_platform_collisions)
 
     if not(game_over):
         redraw_window(window, player)
