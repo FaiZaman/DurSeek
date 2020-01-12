@@ -10,6 +10,7 @@ from Platform import Platform
 pygame.init()
 score = 0
 win_score = 5
+fps = 40
 
 # create game window and clock
 screen_width = 1000
@@ -82,7 +83,7 @@ def draw_game_over(window, starting, won):
     
     waiting = True
     while waiting:
-        clock.tick(60)
+        clock.tick(fps)
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -95,20 +96,22 @@ def draw_ground(ground_coords, tx, ty):
 
     ground = Platform(0, 0)
     ground_coords = ground.get_coords_list(ground_coords, tx, ty)
-    i = 0
 
-    while i < len(ground_coords):
+    for i in range(0, len(ground_coords)):
         ground = Platform(ground_coords[i], screen_height - ty)
         platforms.add(ground)
         game_objects.add(ground)
         sprites.add(ground)
-        i += 1
+        if i >= 2:
+            if ground_coords[i] - 128 != ground_coords[i - 1] and ground_coords[i] - 256 != ground_coords[i - 2]:
+                draw_platform([ground_coords[i - 1]], rand.randrange(15), rand.randrange(300, 500), 128, 32)
 
 
 def draw_platform(platform_coords, width, y_position, tx, ty):
 
-    for i in range(0, width):
-        platform_coords.append(rand.randrange(1000, 1500))
+    if platform_coords == []:
+        for i in range(0, width):
+            platform_coords.append(rand.randrange(1300, 1700))
     
     for j in range(0, len(platform_coords)):
         platform = Platform(platform_coords[j], y_position)
@@ -127,10 +130,12 @@ ty = 128
 small_font = pygame.font.SysFont('comicsans', 30, True)
 medium_font = pygame.font.SysFont('comicsans', 45, True)
 large_font = pygame.font.SysFont('comicsans', 75, True)
-pygame.time.set_timer(pygame.USEREVENT+1, 3000)
-pygame.time.set_timer(pygame.USEREVENT+2, 3500)
+pygame.time.set_timer(pygame.USEREVENT+1, 10000)
+pygame.time.set_timer(pygame.USEREVENT+2, 2000)
+pygame.time.set_timer(pygame.USEREVENT+3, 3500)
 shootLoop = 0
 game_over = True
+first_game = True
 starting = True
 won = False
 
@@ -150,13 +155,18 @@ while running:
         enemies = pygame.sprite.Group()
         projectiles = pygame.sprite.Group()
         platforms = pygame.sprite.Group()
+        if not first_game:
+            ground_coords = []
         draw_ground(ground_coords, tx, ty)
 
         player = Player()
         sprites.add(player)
 
+        player.health = 100
+        score = 0
+
     # clock speed and event detection
-    clock.tick(60)
+    clock.tick(fps)
     
     # projectile cooldown
     if shootLoop > 0:
@@ -172,34 +182,43 @@ while running:
         elif projectile.rect.left >= screen_width:
             projectile.kill()
 
-        projectile_enemy_collisions = pygame.sprite.spritecollide(projectile, enemies, True)
+        projectile_enemy_collisions = pygame.sprite.spritecollide(projectile, enemies, False)
         if projectile_enemy_collisions:
             projectile.kill()
+            for enemy in projectile_enemy_collisions:
+                enemy.exploding = True
+                enemy.rect.x -= 50
+                enemy.rect.y -= 50
+
+    keys = pygame.key.get_pressed()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.USEREVENT+1:
+        if keys[pygame.K_RIGHT]:
             spawn_probability = rand.random()
-            if spawn_probability > 0.8:
-                treasure = Treasure()
-                treasures.add(treasure)
-                game_objects.add(treasure)
-                sprites.add(treasure)
-            elif spawn_probability > 0.2:
-                enemy = Enemy()
-                enemies.add(enemy)
-                game_objects.add(enemy)
-                sprites.add(enemy)
-        if event.type == pygame.USEREVENT+2:
-            width = rand.randrange(10)
-            y_position = rand.randrange(300, 500)
-            draw_platform([], width, y_position, 128, 32)
+            if event.type == pygame.USEREVENT+1:
+                if spawn_probability > 0.5:
+                    treasure = Treasure(1500, rand.randrange(0, 400))
+                    treasures.add(treasure)
+                    game_objects.add(treasure)
+                    sprites.add(treasure)
+            if event.type == pygame.USEREVENT+2:
+                    enemy = Enemy(1500, rand.randrange(0, 400))
+                    enemies.add(enemy)
+                    game_objects.add(enemy)
+                    sprites.add(enemy)
+            if event.type == pygame.USEREVENT+3:
+                width = rand.randrange(15)
+                y_position = rand.randrange(300, 500)
+                draw_platform([], width, y_position, 128, 32)
 
     # collision detection
     player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
     if player_enemy_collisions:
-        player.lose_health()
+        for enemy in enemies:
+            if not(enemy.exploding):
+                player.lose_health()
 
     treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
     if treasure_collisions:
@@ -209,12 +228,12 @@ while running:
     if score >= win_score:
         game_over = True
         won = True
+        first_game = False
     elif player.health == 0:
         game_over = True
         won = False
-   
-    keys = pygame.key.get_pressed()
-        
+        first_game = False
+           
     # player movement
     if keys[pygame.K_LEFT] and player.rect.x > player.speed:
 
@@ -262,16 +281,16 @@ while running:
         shootLoop = 1
 
         # create and orient projectile
-        bullet = Projectile(player.rect.x, player.rect.centery)
+        fireball = Projectile(player.rect.left - 70, player.rect.centery - 30)
         if len(projectiles) < 3:
             if player.facing_right:
-                bullet.shot_right = True
+                fireball.shot_right = True
             else:
-                bullet.shot_right = False
+                fireball.shot_right = False
 
-            projectiles.add(bullet)
-            game_objects.add(bullet)
-            sprites.add(bullet)
+            projectiles.add(fireball)
+            game_objects.add(fireball)
+            sprites.add(fireball)
 
     player.jump(keys[pygame.K_UP])
 
@@ -280,25 +299,20 @@ while running:
     if player.rect.y > screen_height:
         game_over = True
         won = False
+        first_game = False
 
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
-    if player_platform_collisions:
-        highest_y = 0
-        for platform in player_platform_collisions:
-            if platform.rect.top > highest_y:
-                highest_y = platform.rect.top
-        if player.rect.y < highest_y:
-            player.rect.bottom = highest_y + 12
+    player.player_platform_collision_handling(player_platform_collisions)
 
     for enemy in enemies:
         enemy.apply_gravity()
         enemy_platform_collisions = pygame.sprite.spritecollide(enemy, platforms, False)
-        if enemy_platform_collisions:
-            highest_y = 0
-            for platform in enemy_platform_collisions:
-                if platform.rect.top > highest_y:
-                    highest_y = platform.rect.top
-            enemy.rect.bottom = highest_y + 12
+        enemy.platform_collision_handling(enemy_platform_collisions)
+
+    for treasure in treasures:
+        treasure.apply_gravity()
+        treasure_platform_collisions = pygame.sprite.spritecollide(treasure, platforms, False)
+        treasure.platform_collision_handling(treasure_platform_collisions)
 
     if not(game_over):
         redraw_window(window, player)

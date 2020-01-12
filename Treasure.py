@@ -5,9 +5,5 @@ class Treasure(Entity):
 
     treasure = pygame.image.load("assets/misc/treasure.png")
 
-    def __init__(self):
-        super().__init__(1050, 580, self.treasure)
-
-
-    def hit(self, player, treasure, game_objects):
-        game_objects.pop(game_objects.index(treasure))
+    def __init__(self, x, y):
+        super().__init__(x, y, self.treasure)

@@ -13,6 +13,7 @@ class Player(Entity):
                 pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
 
     left_standing_list = [pygame.image.load("assets/character/standing/standing_L1.png"), pygame.image.load("assets/character/standing/standing_L2.png")]
+
     right_standing_list = [pygame.image.load("assets/character/standing/standing_R1.png"), pygame.image.load("assets/character/standing/standing_R2.png")]
 
     def __init__(self):
@@ -27,10 +28,15 @@ class Player(Entity):
         self.walk_left = False
         self.is_jumping = False
         self.jump_length = 12
+        self.falling = False
+        self.on_ground = True
         self.facing_right = True
         self.cooldown = 0
-
+        self.tinted = False
+        self.tint_scale = 0.5
+        self.knockback = 50
     
+
     def set_image(self):
 
         if self.steps + 1 > 18:
@@ -49,6 +55,10 @@ class Player(Entity):
             else:
                 self.image = self.right_standing_list[self.stand_count % 2]
             self.stand_count += 1
+        
+        if self.tinted:
+            self.tint()
+            self.tinted = False
 
 
     def move_left(self):
@@ -75,26 +85,25 @@ class Player(Entity):
 
         # quadratic jumping functionality
         if not(self.is_jumping):
+            self.falling = False
+            self.on_ground = True
             if jump_key:
                 self.is_jumping = True
                 self.walk_left = False
                 self.walk_right = False
                 self.steps = 0
+                self.on_ground = False
         else:
             if self.jump_length >= -12:
                 multiplier = 1
                 if self.jump_length < 0:
+                    self.falling = True
                     multiplier = -1
                 self.rect.bottom -= (self.jump_length ** 2) * 0.5 * multiplier
                 self.jump_length -= 1
             else:
                 self.is_jumping = False
                 self.jump_length = 12
-    
-
-    def apply_gravity(self):
-
-        self.rect.y += self.gravity
         
 
     def lose_health(self):
@@ -105,6 +114,24 @@ class Player(Entity):
             self.cooldown = 10
             self.health -= 10
             if self.facing_right:
-                self.rect.x -= 50
+                self.rect.x -= self.knockback
             else:
-                self.rect.x += 50
+                self.rect.x += self.knockback
+            self.tinted = True
+
+
+    def tint(self):
+
+        GB = min(255, max(0, round(255 * (1 - self.tint_scale))))
+        self.image.fill((255, GB, GB), special_flags = pygame.BLEND_MULT)
+
+
+    def player_platform_collision_handling(self, collisions):
+
+        if collisions:
+            highest_y = 0
+            for platform in collisions:
+                if platform.rect.top > highest_y:
+                    highest_y = platform.rect.top
+            if (self.rect.y < highest_y and self.falling) or (self.rect.y < highest_y and self.on_ground):
+                self.rect.bottom = highest_y + 12

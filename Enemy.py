@@ -1,6 +1,9 @@
 import pygame
 from Entity import Entity
-from Player import Player
+
+explosion_list = []
+for n in range(1, 91):
+    explosion_list.append(pygame.image.load("assets/explosions/E (" + str(n) + ").png"))
 
 class Enemy(Entity):
 
@@ -9,25 +12,29 @@ class Enemy(Entity):
                  pygame.image.load("assets/enemy/L5.png"), pygame.image.load("assets/enemy/L6.png"),\
                  pygame.image.load("assets/enemy/L7.png"), pygame.image.load("assets/enemy/L8.png"),\
                  pygame.image.load("assets/enemy/L9.png"), pygame.image.load("assets/enemy/L10.png")]
+    explosion_list = explosion_list
 
-    def __init__(self):
+    def __init__(self, x, y):
         
-        super().__init__(1050, 600, self.left_list[0])
+        super().__init__(x, y, self.left_list[0])
         self.speed = 4
         self.steps = 0
+        self.exploding = False
+        self.explode_count = 0
 
     
     def set_image(self):
         
-        if self.steps + 1 > 30:
-            self.steps = 0
+        if not(self.exploding):
+            if self.steps + 1 > 30:
+                self.steps = 0
 
-        self.image = self.left_list[self.steps//3]
-        self.steps += 1
-        self.rect.x -= self.speed
+            self.image = self.left_list[self.steps//3]
+            self.steps += 1
+            self.rect.x -= self.speed
+        else:
+            self.image = self.explosion_list[self.explode_count]
+            self.explode_count += 1
 
-
-    def apply_gravity(self):
-
-        self.rect.y += self.gravity
-        
+            if self.explode_count == 90:
+                self.kill()
