@@ -31,9 +31,7 @@ class Player(Entity):
         self.on_ground = True
         self.facing_right = True
         self.cooldown = 0
-        self.tinted = False
-        self.tint_scale = 0.5
-        self.knockback = 50
+        self.knockback = 100
     
 
     def set_image(self):
@@ -54,10 +52,6 @@ class Player(Entity):
             else:
                 self.image = self.right_standing_list[self.stand_count % 2]
             self.stand_count += 1
-        
-        if self.tinted:
-            self.tint()
-            self.tinted = False
 
 
     def move_left(self):
@@ -119,15 +113,8 @@ class Player(Entity):
                 self.rect.x -= self.knockback
             else:
                 self.rect.x += self.knockback
-            self.tinted = True
 
         return lost_health
-
-
-    def tint(self):
-
-        GB = min(255, max(0, round(255 * (1 - self.tint_scale))))
-        self.image.fill((255, GB, GB), special_flags = pygame.BLEND_MULT)
 
 
     def player_platform_collision_handling(self, collisions):

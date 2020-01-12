@@ -15,11 +15,15 @@ class Platform(Entity):
 
     def get_coords_list(self, ground_coords, tx, ty):
 
+        no_ground_list = []
+
         i = 0
         while i <= (1000/tx) + tx:
             ground_spawn = rand.random()
             if ground_spawn > 0.2 or i == 0:
                 ground_coords.append(i*tx)
+            else:
+                no_ground_list.append(i*tx)
             i += 1
     
-        return ground_coords
+        return ground_coords, no_ground_list

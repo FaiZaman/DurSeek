@@ -23,7 +23,6 @@ background = pygame.image.load("assets/background/background.jpg")
 background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
 background_x1 = 0
 background_x2 = background.get_width()
-background_speed = 10
 
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
@@ -104,16 +103,16 @@ def draw_game_over(window, starting, won):
 def draw_ground(ground_coords, tx, ty):
 
     ground = Platform(0, 0)
-    ground_coords = ground.get_coords_list(ground_coords, tx, ty)
+    ground_coords, no_ground_list = ground.get_coords_list(ground_coords, tx, ty)
 
     for i in range(0, len(ground_coords)):
         ground = Platform(ground_coords[i], screen_height - ty)
         platforms.add(ground)
         game_objects.add(ground)
         sprites.add(ground)
-        if i >= 2:
-            if ground_coords[i] - 128 != ground_coords[i - 1] and ground_coords[i] - 256 != ground_coords[i - 2]:
-                draw_platform([ground_coords[i - 2]], rand.randrange(15), rand.randrange(300, 550), 128, 32)
+    
+    for j in range(0, len(no_ground_list)):
+        draw_platform([no_ground_list[j]], rand.randrange(5), rand.randrange(475, 550), 128, 32)
 
 
 def draw_platform(platform_coords, width, y_position, tx, ty):
@@ -173,6 +172,7 @@ while running:
 
         player.health = 100
         score = 0
+        background_speed = 4
 
         pygame.mixer.music.play(-1)
 
@@ -228,7 +228,7 @@ while running:
     # collision detection
     player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
     if player_enemy_collisions:
-        for enemy in enemies:
+        for enemy in player_enemy_collisions:
             if not(enemy.exploding):
                 lost_health = player.lose_health()
                 if lost_health:
@@ -238,6 +238,7 @@ while running:
     if treasure_collisions:
         treasure_sound.play()
         score += 1
+        background_speed += 2
   
     # check score and health to see if game over
     if score >= win_score:
