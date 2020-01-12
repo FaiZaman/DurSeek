@@ -28,6 +28,7 @@ class Player(Entity):
         self.walk_left = False
         self.is_jumping = False
         self.jump_length = 12
+        self.falling = False
         self.facing_right = True
         self.cooldown = 0
         self.tinted = False
@@ -83,6 +84,7 @@ class Player(Entity):
 
         # quadratic jumping functionality
         if not(self.is_jumping):
+            self.falling = False
             if jump_key:
                 self.is_jumping = True
                 self.walk_left = False
@@ -92,6 +94,7 @@ class Player(Entity):
             if self.jump_length >= -12:
                 multiplier = 1
                 if self.jump_length < 0:
+                    self.falling = True
                     multiplier = -1
                 self.rect.bottom -= (self.jump_length ** 2) * 0.5 * multiplier
                 self.jump_length -= 1

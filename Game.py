@@ -23,7 +23,7 @@ background = pygame.image.load("assets/background/background.jpg")
 background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
 background_x1 = 0
 background_x2 = background.get_width()
-background_speed = 50
+background_speed = 10
 
 # load in game object images
 ground = pygame.image.load("assets/background/ground.png")
@@ -155,9 +155,9 @@ while running:
         enemies = pygame.sprite.Group()
         projectiles = pygame.sprite.Group()
         platforms = pygame.sprite.Group()
-        if first_game:
-            draw_ground(ground_coords, tx, ty)
-            print("drawn")
+        if not first_game:
+            ground_coords = []
+        draw_ground(ground_coords, tx, ty)
 
         player = Player()
         sprites.add(player)
