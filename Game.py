@@ -107,6 +107,7 @@ def draw_ground(ground_coords, tx, ty):
     ground = Platform(0, 0)
     ground_coords, no_ground_list = ground.get_coords_list(ground_coords, tx, ty)
 
+    print(ground_coords[0:15])
     for i in range(0, len(ground_coords)):
         ground = Platform(ground_coords[i], screen_height - ty)
         platforms.add(ground)
@@ -129,6 +130,16 @@ def draw_platform(platform_coords, width, y_position, tx, ty):
         platforms.add(platform)
         game_objects.add(platform)
         sprites.add(platform)
+
+
+def create_heart():
+
+    heart = Heart(1500, rand.randrange(0, 300))
+    heart.rect.y -= 50
+    hearts.add(heart)
+    gravitons.add(heart)
+    game_objects.add(heart)
+    sprites.add(heart)
 
 
 # create ground throughout
@@ -199,7 +210,8 @@ while running:
 
         projectile_enemy_collisions = pygame.sprite.spritecollide(projectile, enemies, False)
         if projectile_enemy_collisions:
-            projectile.kill()
+            if not(enemy.exploding):
+                projectile.kill()
             for enemy in projectile_enemy_collisions:
                 explosion_sound.play()
                 enemy.exploding = True
@@ -242,7 +254,7 @@ while running:
     player_heart_collisions = pygame.sprite.spritecollide(player, hearts, True)
     if player_heart_collisions:
         health_sound.play()
-        player.health += 50
+        player.health += 30
         if player.health > 100:
             player.health = 100
 
@@ -251,20 +263,17 @@ while running:
         treasure_sound.play()
         score += 1
         background_speed += 2
-        if score >= 8:
+        if score == 8:
             pygame.time.set_timer(pygame.USEREVENT+2, 400)
-        elif score >= 6:
+            create_heart()
+        elif score == 6:
             pygame.time.set_timer(pygame.USEREVENT+2, 800)
-        elif score >= 4:
+            create_heart()
+        elif score == 4:
             pygame.time.set_timer(pygame.USEREVENT+2, 1200)
-        elif score >= 2:
+        elif score == 2:
             pygame.time.set_timer(pygame.USEREVENT+2, 1500)
-            heart = Heart(1500, rand.randrange(0, 300))
-            heart.rect.y -= 50
-            hearts.add(heart)
-            gravitons.add(heart)
-            game_objects.add(heart)
-            sprites.add(heart)
+            create_heart()
   
     # check score and health to see if game over
     if score >= win_score:
@@ -326,7 +335,7 @@ while running:
         # create and orient projectile
         fireball = Projectile(player.rect.left - 70, player.rect.centery - 30)
         fireball_sound.play()
-        if len(projectiles) < 3:
+        if len(projectiles) == 0:
             if player.facing_right:
                 fireball.shot_right = True
             else:
@@ -337,8 +346,8 @@ while running:
             sprites.add(fireball)
 
     player.jump(keys[pygame.K_UP])
-
-    # endgame if player fell off screen
+    
+    # end game if player fell off screen
     player.apply_gravity()
     if player.rect.y > screen_height:
         game_over = True
@@ -347,7 +356,8 @@ while running:
         death_sound.play()
 
     player_platform_collisions = pygame.sprite.spritecollide(player, platforms, False)
-    player.player_platform_collision_handling(player_platform_collisions)
+    if player_platform_collisions:
+        player.player_platform_collision_handling(player_platform_collisions)
 
     for graviton in gravitons:
         graviton.apply_gravity()
