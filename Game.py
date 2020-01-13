@@ -11,7 +11,7 @@ from Upgrades import Heart
 pygame.init()
 score = 0
 win_score = 10
-fps = 40
+fps = 60
 
 # create game window and clock
 screen_width = 1000
@@ -102,34 +102,25 @@ def draw_game_over(window, starting, won):
                 waiting = False
 
 
-def draw_ground(ground_coords, tx, ty):
+def draw_ground():
 
-    ground = Platform(0, 0)
-    ground_coords, no_ground_list = ground.get_coords_list(ground_coords, tx, ty)
+    for i in range(0, 50000, 128):
+        if rand.random() > 0.2:
+            ground = Platform(i, screen_height - 128)
+            platforms.add(ground)
+            game_objects.add(ground)
+            sprites.add(ground)
+        else:
+            draw_platform(i, rand.randrange(5), rand.randrange(500, 540))
 
-    print(ground_coords[0:15])
-    for i in range(0, len(ground_coords)):
-        ground = Platform(ground_coords[i], screen_height - ty)
-        platforms.add(ground)
-        game_objects.add(ground)
-        sprites.add(ground)
+
+def draw_platform(x, width, y_position):
     
-    for j in range(0, len(no_ground_list)):
-        draw_platform([no_ground_list[j]], rand.randrange(5), rand.randrange(500, 540), 128, 32)
-
-
-def draw_platform(platform_coords, width, y_position, tx, ty):
-
-    if platform_coords == []:
-        for i in range(0, width):
-            platform_coords.append(rand.randrange(1300, 1700))
-    
-    for j in range(0, len(platform_coords)):
-        platform = Platform(platform_coords[j], y_position)
-        platform.image = platform.platform
-        platforms.add(platform)
-        game_objects.add(platform)
-        sprites.add(platform)
+    platform = Platform(x, y_position)
+    platform.image = platform.platform
+    platforms.add(platform)
+    game_objects.add(platform)
+    sprites.add(platform)
 
 
 def create_heart():
@@ -142,8 +133,6 @@ def create_heart():
     sprites.add(heart)
 
 
-# create ground throughout
-ground_coords = []
 tx = 128
 ty = 128
 
@@ -178,9 +167,7 @@ while running:
         projectiles = pygame.sprite.Group()
         platforms = pygame.sprite.Group()
         hearts = pygame.sprite.Group()
-        if not first_game:
-            ground_coords = []
-        draw_ground(ground_coords, tx, ty)
+        draw_ground()
 
         player = Player()
         sprites.add(player)
@@ -241,7 +228,7 @@ while running:
             if event.type == pygame.USEREVENT+3:
                 width = rand.randrange(15)
                 y_position = rand.randrange(300, 550)
-                draw_platform([], width, y_position, 128, 32)
+                draw_platform(1500, rand.randrange(5), rand.randrange(0, 300))
 
     # collision detection
     player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
@@ -309,11 +296,11 @@ while running:
         player.move_right()
 
         # background scrolling with player
-        background_x1 -= background_speed
+        background_x1 -= 1
         if background_x1 < background.get_width() * -1:
             background_x1 = background.get_width()
 
-        background_x2 -= background_speed
+        background_x2 -= 1
         if background_x2 < background.get_width() * -1:
             background_x2 = background.get_width()
 
