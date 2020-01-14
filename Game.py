@@ -1,5 +1,6 @@
 import pygame
 import random as rand
+import time
 from Screen import Screen
 from Player import Player
 from Treasure import Treasure
@@ -80,6 +81,7 @@ def draw_game_over(window, starting, won):
         controls = small_font.render('Use the arrow keys to move and jump, and space to shoot', 1, (128, 0, 128))
         window.blit(controls, (200, 300))
         window.blit(play, (300, 400))
+        pygame.display.update()
     else:
         if won:
             text = medium_font.render('You Win!', 1, (128, 0, 128))
@@ -88,9 +90,9 @@ def draw_game_over(window, starting, won):
             text = medium_font.render('You Lose!', 1, (128, 0, 128))
             window.blit(text, (420, 200))
         window.blit(again, (300, 400))
-        
-    pygame.display.update()
-    
+        pygame.display.update()
+        time.sleep(2.5)
+            
     waiting = True
     while waiting:
         clock.tick(fps)
@@ -104,23 +106,26 @@ def draw_game_over(window, starting, won):
 
 def draw_ground():
 
+    platform_y = [500, 510, 520, 530, 540]
+
     for i in range(0, 50000, 128):
-        if rand.random() > 0.2:
+        if rand.random() > 0.2 or i <= 512:
             ground = Platform(i, screen_height - 128)
             platforms.add(ground)
             game_objects.add(ground)
             sprites.add(ground)
         else:
-            draw_platform(i, rand.randrange(5), rand.randrange(500, 540))
+            draw_platform(i, rand.randrange(1, 2), rand.choice(platform_y))
 
 
 def draw_platform(x, width, y_position):
     
-    platform = Platform(x, y_position)
-    platform.image = platform.platform
-    platforms.add(platform)
-    game_objects.add(platform)
-    sprites.add(platform)
+    for w in range(0, width):
+        platform = Platform(x + 128*w, y_position)
+        platform.image = platform.platform
+        platforms.add(platform)
+        game_objects.add(platform)
+        sprites.add(platform)
 
 
 def create_heart():
@@ -133,21 +138,19 @@ def create_heart():
     sprites.add(heart)
 
 
-tx = 128
-ty = 128
-
 # create game object list, object spawn timer, and font
 small_font = pygame.font.SysFont('comicsans', 30, True)
 medium_font = pygame.font.SysFont('comicsans', 45, True)
 large_font = pygame.font.SysFont('comicsans', 75, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 10000)
 pygame.time.set_timer(pygame.USEREVENT+2, 2000)
-pygame.time.set_timer(pygame.USEREVENT+3, 3500)
+pygame.time.set_timer(pygame.USEREVENT+3, 5000)
 shootLoop = 0
 game_over = True
 first_game = True
 starting = True
 won = False
+high_platform_y = [300, 350, 400, 450, 500]
 
 # main event loop
 running = True
@@ -227,8 +230,7 @@ while running:
                     sprites.add(enemy)
             if event.type == pygame.USEREVENT+3:
                 width = rand.randrange(15)
-                y_position = rand.randrange(300, 550)
-                draw_platform(1500, rand.randrange(5), rand.randrange(0, 300))
+                draw_platform(1500, rand.randrange(5, 10), rand.choice(high_platform_y))
 
     # collision detection
     player_enemy_collisions = pygame.sprite.spritecollide(player, enemies, False)
@@ -249,7 +251,7 @@ while running:
     if treasure_collisions:
         treasure_sound.play()
         score += 1
-        background_speed += 2
+        background_speed += 1
         if score == 8:
             pygame.time.set_timer(pygame.USEREVENT+2, 400)
             create_heart()
