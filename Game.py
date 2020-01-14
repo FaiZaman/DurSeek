@@ -79,8 +79,10 @@ def draw_game_over(window, starting, won):
         window.blit(title, (375, 150))
 
         controls = small_font.render('Use the arrow keys to move and jump, and space to shoot', 1, (128, 0, 128))
+        instructions = small_font.render('Collect all 10 treasures to win, and keep ahead of the red storm behind you!', 1, (128, 0, 128))
         window.blit(controls, (200, 300))
-        window.blit(play, (300, 400))
+        window.blit(instructions, (50, 450))
+        window.blit(play, (300, 600))
         pygame.display.update()
     else:
         if won:
@@ -145,7 +147,6 @@ large_font = pygame.font.SysFont('comicsans', 75, True)
 pygame.time.set_timer(pygame.USEREVENT+1, 10000)
 pygame.time.set_timer(pygame.USEREVENT+2, 2000)
 pygame.time.set_timer(pygame.USEREVENT+3, 5000)
-shootLoop = 0
 game_over = True
 first_game = True
 starting = True
@@ -197,16 +198,10 @@ while running:
     for sprite in sprites:
         sprite.rect.x -= background_speed
         if sprite.rect.x <= sprite.rect.width * -1:
-            if isinstance(sprite, Projectile):
-                sprite.kill()
-            elif isinstance(sprite, Player):
+            if isinstance(sprite, Player):
                 player.health = 0
-    
-    # projectile cooldown
-    if shootLoop > 0:
-        shootLoop += 1
-    if shootLoop > 10:
-        shootLoop = 0
+            else:
+                sprite.kill()
 
     # projectile movement
     for projectile in projectiles:
@@ -295,11 +290,14 @@ while running:
            
     # player movement
     if keys[pygame.K_LEFT] and player.rect.x > player.speed:
-
         player.move_left()
 
     elif keys[pygame.K_RIGHT]:
 
+        if player.rect.x < 400:
+            player.rect.x += player.speed
+        else:
+            player.rect.x += background_speed
         player.move_right()
     
     else:
@@ -307,9 +305,7 @@ while running:
         player.steps = 0
 
     # shoot projectiles
-    if keys[pygame.K_SPACE] and shootLoop == 0:
-
-        shootLoop = 1
+    if keys[pygame.K_SPACE]:
 
         # create and orient projectile
         fireball = Projectile(player.rect.left - 70, player.rect.centery - 30)

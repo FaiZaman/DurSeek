@@ -64,10 +64,6 @@ class Player(Entity):
     
     def move_right(self):
 
-        if self.rect.x < 400:
-            self.rect.x += self.speed
-        elif self.rect.x < 410:
-            self.rect.x = 404
         self.walk_left = False
         self.walk_right = True
         self.standing = False
