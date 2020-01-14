@@ -17,7 +17,7 @@ class Player(Entity):
 
     def __init__(self):
 
-        super().__init__(100, 500, self.right_standing_list[0])
+        super().__init__(400, 500, self.right_standing_list[0])
         self.speed = 10
         self.steps = 0
         self.health = 100
@@ -30,7 +30,7 @@ class Player(Entity):
         self.falling = False
         self.on_ground = True
         self.facing_right = True
-        self.knockback = 100
+        self.knockback = 50
     
 
     def set_image(self):
@@ -55,8 +55,7 @@ class Player(Entity):
 
     def move_left(self):
 
-        if self.rect.x >= 400:
-            self.rect.x -= self.speed
+        self.rect.x -= self.speed/2
         self.walk_left = True
         self.walk_right = False
         self.standing = False
@@ -67,6 +66,8 @@ class Player(Entity):
 
         if self.rect.x < 400:
             self.rect.x += self.speed
+        elif self.rect.x < 410:
+            self.rect.x = 404
         self.walk_left = False
         self.walk_right = True
         self.standing = False
@@ -101,10 +102,7 @@ class Player(Entity):
     def lose_health(self):
 
         self.health -= 10
-        if self.facing_right:
-            self.rect.x -= self.knockback
-        else:
-            self.rect.x += self.knockback
+        self.rect.x -= self.knockback
 
 
     def player_platform_collision_handling(self, collisions):

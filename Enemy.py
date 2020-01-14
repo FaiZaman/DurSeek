@@ -17,7 +17,7 @@ class Enemy(Entity):
     def __init__(self, x, y):
         
         super().__init__(x, y, self.left_list[0])
-        self.speed = 4
+        self.speed = 3
         self.steps = 0
         self.exploding = False
         self.explode_count = 0

@@ -19,6 +19,7 @@ screen_width = 1000
 screen_height = 739
 window = Screen(screen_width, screen_height)
 window = window.create_screen()
+clock = pygame.time.Clock()
 
 # load in background and its properties
 background = pygame.image.load("assets/background/background.jpg")
@@ -26,12 +27,8 @@ background_flipped = pygame.image.load("assets/background/background_flipped.jpg
 background_x1 = 0
 background_x2 = background.get_width()
 
-# load in game object images
-ground = pygame.image.load("assets/background/ground.png")
-clock = pygame.time.Clock()
-
 # load in music and sound effects
-pygame.mixer.music.load('assets/sound/game_theme.mp3')
+pygame.mixer.music.load('assets/sound/theme.mp3')
 treasure_sound = pygame.mixer.Sound('assets/sound/treasure.wav')
 explosion_sound = pygame.mixer.Sound('assets/sound/explosion.wav')
 fireball_sound = pygame.mixer.Sound('assets/sound/fireball.wav')
@@ -48,12 +45,15 @@ def redraw_window(window, player):
 
     # render the score
     text = small_font.render('Score: ' + str(score), 1, (0, 0, 0))
-    window.blit(text, (10, 60))
+    window.blit(text, (30, 60))
 
     # draw health bar
-    pygame.draw.rect(window, (200, 0, 0), (10, 10, 500, 40))
-    pygame.draw.rect(window, (0, 180, 0), (10, 10, player.health * 5, 40))
-    pygame.draw.rect(window, (0, 0, 0), (10, 10, 500, 40), 2)
+    pygame.draw.rect(window, (200, 0, 0), (30, 10, 500, 40))
+    pygame.draw.rect(window, (0, 180, 0), (30, 10, player.health * 5, 40))
+    pygame.draw.rect(window, (0, 0, 0), (30, 10, 500, 40), 2)
+
+    # draw the storm
+    pygame.draw.rect(window, (240, 0, 0), (0, 0, 10, screen_height))
 
     # update sprite images
     player.set_image()
@@ -183,6 +183,24 @@ while running:
 
     # clock speed and event detection
     clock.tick(fps)
+
+     # background scrolling with player
+    background_x1 -= 1
+    if background_x1 < background.get_width() * -1:
+        background_x1 = background.get_width()
+
+    background_x2 -= 1
+    if background_x2 < background.get_width() * -1:
+        background_x2 = background.get_width()
+
+    # move game objects left
+    for sprite in sprites:
+        sprite.rect.x -= background_speed
+        if sprite.rect.x <= sprite.rect.width * -1:
+            if isinstance(sprite, Projectile):
+                sprite.kill()
+            elif isinstance(sprite, Player):
+                player.health = 0
     
     # projectile cooldown
     if shootLoop > 0:
@@ -280,37 +298,9 @@ while running:
 
         player.move_left()
 
-        # background scrolling with player
-        background_x1 += background_speed
-        if background_x1 > background.get_width():
-            background_x1 = background.get_width() * -1
-
-        background_x2 += background_speed
-        if background_x2 > background.get_width():
-            background_x2 = background.get_width() * -1
-
-        # move game objects right
-        for game_object in game_objects:
-            game_object.rect.x += background_speed
-
     elif keys[pygame.K_RIGHT]:
 
         player.move_right()
-
-        # background scrolling with player
-        background_x1 -= 1
-        if background_x1 < background.get_width() * -1:
-            background_x1 = background.get_width()
-
-        background_x2 -= 1
-        if background_x2 < background.get_width() * -1:
-            background_x2 = background.get_width()
-
-        # move game objects left
-        for game_object in game_objects:
-            game_object.rect.x -= background_speed
-            if game_object.rect.x <= game_object.rect.width * -1 and isinstance(game_object, Projectile):
-                game_object.kill()
     
     else:
         player.standing = True
