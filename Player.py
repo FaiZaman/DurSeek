@@ -83,13 +83,14 @@ class Player(Entity):
                 self.steps = 0
                 self.on_ground = False
         else:
-            if self.jump_length >= -12:
-                multiplier = 1
-                if self.jump_length < 0:
-                    self.falling = True
-                    multiplier = -1
-                self.rect.bottom -= (self.jump_length ** 2) * 0.5 * multiplier
-                self.jump_length -= 1
+            if not(self.on_ground):
+                if self.jump_length >= -12:
+                    multiplier = 1
+                    if self.jump_length < 0:
+                        self.falling = True
+                        multiplier = -1
+                    self.rect.bottom -= (self.jump_length ** 2) * 0.5 * multiplier
+                    self.jump_length -= 1
             else:
                 self.is_jumping = False
                 self.jump_length = 12
@@ -111,3 +112,4 @@ class Player(Entity):
             if (self.falling or self.on_ground) and self.rect.y < highest_y:
                 self.rect.bottom = highest_y + 12
                 self.on_ground = True
+                self.falling = False

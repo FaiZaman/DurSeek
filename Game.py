@@ -110,10 +110,10 @@ def draw_game_over(window, starting, won, score):
 
 def draw_ground():
 
-    platform_y = [500, 510, 520, 530, 540]
+    platform_y = [490, 520, 550]
 
     for i in range(0, 50000, 128):
-        if (rand.random() > 0.2 or i <= 512) and i != 256:
+        if (rand.random() > 0.2 or i <= 512):
             ground = Platform(i, screen_height - 128)
             platforms.add(ground)
             game_objects.add(ground)
@@ -183,14 +183,13 @@ while running:
         hearts = pygame.sprite.Group()
         jump_boosts = pygame.sprite.Group()
         draw_ground()
-        #draw_platform(200, 4, 550)
 
         player = Player()
         sprites.add(player)
 
         player.health = 100
         score = 0
-        background_speed = 0
+        background_speed = 4    
 
         pygame.mixer.music.play(-1)
 
