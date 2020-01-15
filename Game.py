@@ -32,7 +32,7 @@ pygame.mixer.music.load('assets/sound/theme.mp3')
 treasure_sound = pygame.mixer.Sound('assets/sound/treasure.wav')
 explosion_sound = pygame.mixer.Sound('assets/sound/explosion.wav')
 fireball_sound = pygame.mixer.Sound('assets/sound/fireball.wav')
-health_sound = pygame.mixer.Sound('assets/sound/health.wav')
+upgrade_sound = pygame.mixer.Sound('assets/sound/health.wav')
 damage_sound = pygame.mixer.Sound('assets/sound/damage.wav')
 death_sound = pygame.mixer.Sound('assets/sound/death.wav')
 
@@ -78,9 +78,9 @@ def draw_game_over(window, starting, won, score):
         title = large_font.render('DURSEEK', 1, (128, 0, 128))
         window.blit(title, (375, 150))
 
-        controls = small_font.render('Use the arrow keys to move and jump, and space to shoot', 1, (128, 0, 128))
+        controls = small_font.render('Use the arrow keys or WASD to move and jump, and space to shoot', 1, (128, 0, 128))
         instructions = small_font.render('Collect all 10 treasures to win, and keep ahead of the red storm behind you!', 1, (128, 0, 128))
-        window.blit(controls, (200, 300))
+        window.blit(controls, (150, 300))
         window.blit(instructions, (50, 450))
         window.blit(play, (300, 600))
         pygame.display.update()
@@ -119,7 +119,7 @@ def draw_ground():
             game_objects.add(ground)
             sprites.add(ground)
         else:
-            draw_platform(i, rand.randrange(1, 2), 500)
+            draw_platform(i, rand.randrange(1, 2), rand.choice(platform_y))
 
 
 def draw_platform(x, width, y_position):
@@ -183,14 +183,14 @@ while running:
         hearts = pygame.sprite.Group()
         jump_boosts = pygame.sprite.Group()
         draw_ground()
-        #draw_platform(200, 4, 400)
+        #draw_platform(200, 4, 550)
 
         player = Player()
         sprites.add(player)
 
         player.health = 100
         score = 0
-        background_speed = 4
+        background_speed = 0
 
         pygame.mixer.music.play(-1)
 
@@ -238,7 +238,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             spawn_probability = rand.random()
             if event.type == pygame.USEREVENT+1:
                 if spawn_probability > 0.5:
@@ -267,13 +267,14 @@ while running:
 
     player_heart_collisions = pygame.sprite.spritecollide(player, hearts, True)
     if player_heart_collisions:
-        health_sound.play()
+        upgrade_sound.play()
         player.health += 30
         if player.health > 100:
             player.health = 100
 
     player_boost_collisions = pygame.sprite.spritecollide(player, jump_boosts, True)
     if player_boost_collisions:
+        upgrade_sound.play()
         player.gravity -= 10
 
     treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
@@ -309,10 +310,11 @@ while running:
         death_sound.play()
            
     # player movement
-    if keys[pygame.K_LEFT] and player.rect.x > player.speed:
-        player.move_left()
+    if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+        if player.rect.x > player.speed:
+            player.move_left()
 
-    elif keys[pygame.K_RIGHT]:
+    elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
 
         if player.rect.x < 400:
             player.rect.x += player.speed
@@ -340,7 +342,7 @@ while running:
             game_objects.add(fireball)
             sprites.add(fireball)
 
-    player.jump(keys[pygame.K_UP])
+    player.jump(keys[pygame.K_UP], keys[pygame.K_w])
     
     # end game if player fell off screen
     player.apply_gravity()

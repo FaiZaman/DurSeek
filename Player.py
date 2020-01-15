@@ -70,13 +70,13 @@ class Player(Entity):
         self.facing_right = True
 
 
-    def jump(self, jump_key):
+    def jump(self, jump_key1, jump_key2):
 
         # quadratic jumping functionality
         if not(self.is_jumping):
             self.falling = False
             self.on_ground = True
-            if jump_key:
+            if jump_key1 or jump_key2:
                 self.is_jumping = True
                 self.walk_left = False
                 self.walk_right = False
