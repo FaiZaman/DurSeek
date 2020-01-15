@@ -7,7 +7,7 @@ from Treasure import Treasure
 from Projectile import Projectile
 from Enemy import Enemy
 from Platform import Platform
-from Upgrades import Heart
+from Upgrades import Heart, JumpBoost
 
 pygame.init()
 score = 0
@@ -67,7 +67,7 @@ def redraw_window(window, player):
     pygame.display.update()
 
 
-def draw_game_over(window, starting, won):
+def draw_game_over(window, starting, won, score):
 
     pygame.mixer.music.stop()
     window.fill((0, 220, 0))
@@ -90,7 +90,9 @@ def draw_game_over(window, starting, won):
             window.blit(text, (420, 200))
         else:
             text = medium_font.render('You Lose!', 1, (128, 0, 128))
+            score_text = medium_font.render('Score: ' + str(score), 1, (128, 0, 128))
             window.blit(text, (420, 200))
+            window.blit(score_text, (430, 300))
         window.blit(again, (300, 400))
         pygame.display.update()
         time.sleep(2.5)
@@ -111,13 +113,13 @@ def draw_ground():
     platform_y = [500, 510, 520, 530, 540]
 
     for i in range(0, 50000, 128):
-        if rand.random() > 0.2 or i <= 512:
+        if (rand.random() > 0.2 or i <= 512) and i != 256:
             ground = Platform(i, screen_height - 128)
             platforms.add(ground)
             game_objects.add(ground)
             sprites.add(ground)
         else:
-            draw_platform(i, rand.randrange(1, 2), rand.choice(platform_y))
+            draw_platform(i, rand.randrange(1, 2), 500)
 
 
 def draw_platform(x, width, y_position):
@@ -132,12 +134,20 @@ def draw_platform(x, width, y_position):
 
 def create_heart():
 
-    heart = Heart(1500, rand.randrange(0, 300))
-    heart.rect.y -= 50
+    heart = Heart(rand.randrange(1500, 2500), rand.randrange(0, 300))
     hearts.add(heart)
     gravitons.add(heart)
     game_objects.add(heart)
     sprites.add(heart)
+
+
+def create_jump_boost():
+
+    jump_boost = JumpBoost(rand.randrange(1500, 2500), rand.randrange(0, 300))
+    jump_boosts.add(jump_boost)
+    gravitons.add(jump_boost)
+    game_objects.add(jump_boost)
+    sprites.add(jump_boost)
 
 
 # create game object list, object spawn timer, and font
@@ -158,7 +168,7 @@ running = True
 while running:
 
     if game_over:
-        draw_game_over(window, starting, won)
+        draw_game_over(window, starting, won, score)
         game_over = False
         starting = False
         
@@ -171,7 +181,9 @@ while running:
         projectiles = pygame.sprite.Group()
         platforms = pygame.sprite.Group()
         hearts = pygame.sprite.Group()
+        jump_boosts = pygame.sprite.Group()
         draw_ground()
+        #draw_platform(200, 4, 400)
 
         player = Player()
         sprites.add(player)
@@ -230,7 +242,7 @@ while running:
             spawn_probability = rand.random()
             if event.type == pygame.USEREVENT+1:
                 if spawn_probability > 0.5:
-                    treasure = Treasure(1500, rand.randrange(0, 200))
+                    treasure = Treasure(rand.randrange(1500, 2000), rand.randrange(0, 200))
                     treasures.add(treasure)
                     gravitons.add(treasure)
                     game_objects.add(treasure)
@@ -260,17 +272,25 @@ while running:
         if player.health > 100:
             player.health = 100
 
+    player_boost_collisions = pygame.sprite.spritecollide(player, jump_boosts, True)
+    if player_boost_collisions:
+        player.gravity -= 10
+
     treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
     if treasure_collisions:
         treasure_sound.play()
         score += 1
         background_speed += 1
-        if score == 8:
+        if score == 8 and player.gravity == 20:
             pygame.time.set_timer(pygame.USEREVENT+2, 400)
             create_heart()
-        elif score == 6:
+            create_jump_boost()
+        elif score == 6 and player.gravity == 20:
             pygame.time.set_timer(pygame.USEREVENT+2, 800)
             create_heart()
+            create_jump_boost()
+        elif score == 5:            
+            create_jump_boost()
         elif score == 4:
             pygame.time.set_timer(pygame.USEREVENT+2, 1200)
         elif score == 2:

@@ -17,7 +17,7 @@ class Player(Entity):
 
     def __init__(self):
 
-        super().__init__(400, 500, self.right_standing_list[0])
+        super().__init__(200, 500, self.right_standing_list[0])
         self.speed = 10
         self.steps = 0
         self.health = 100
@@ -108,6 +108,6 @@ class Player(Entity):
             for platform in collisions:
                 if platform.rect.top > highest_y:
                     highest_y = platform.rect.top
-            if (self.rect.y < highest_y and self.falling) or (self.rect.y < highest_y and self.on_ground):
+            if (self.falling or self.on_ground) and self.rect.y < highest_y:
                 self.rect.bottom = highest_y + 12
                 self.on_ground = True
