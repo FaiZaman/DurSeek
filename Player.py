@@ -112,7 +112,7 @@ class Player(Entity):
         for platform in collisions:
             if platform.rect.top > highest_y:
                 highest_y = platform.rect.top
-        if (self.falling or self.on_ground) and self.rect.y < highest_y:
+        if (self.falling or self.on_ground) and self.rect.y + 60 < highest_y:
             self.rect.bottom = highest_y + 12
             self.on_ground = True
             self.falling = False

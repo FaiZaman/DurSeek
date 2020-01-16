@@ -152,6 +152,33 @@ def create_jump_boost():
     sprites.add(jump_boost)
 
 
+def treasure_collected(score, background_speed, player):
+
+    treasure_sound.play()
+    score += 1
+    background_speed += 1
+    player.speed += 1
+    if score == 8:
+        pygame.time.set_timer(pygame.USEREVENT+2, 400)
+        create_heart()
+        if player.gravity > 18:
+            create_jump_boost()
+    elif score == 6:
+        pygame.time.set_timer(pygame.USEREVENT+2, 800)
+        create_heart()
+        if player.gravity > 18:
+            create_jump_boost()
+    elif score == 5:            
+        if player.gravity > 18:
+            create_jump_boost()
+    elif score == 4:
+        pygame.time.set_timer(pygame.USEREVENT+2, 1200)
+    elif score == 2:
+        pygame.time.set_timer(pygame.USEREVENT+2, 1500)
+        create_heart()
+    return score, background_speed
+
+
 # create game object list, object spawn timer, and font
 small_font = pygame.font.SysFont('comicsans', 30, True)
 medium_font = pygame.font.SysFont('comicsans', 45, True)
@@ -282,29 +309,12 @@ while running:
     player_boost_collisions = pygame.sprite.spritecollide(player, jump_boosts, True)
     if player_boost_collisions:
         upgrade_sound.play()
-        player.gravity -= 10
+        player.gravity -= 2
 
     treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
     if treasure_collisions:
-        treasure_sound.play()
-        score += 1
-        background_speed += 1
-        player.speed += 1
-        if score == 8 and player.gravity == 20:
-            pygame.time.set_timer(pygame.USEREVENT+2, 400)
-            create_heart()
-            create_jump_boost()
-        elif score == 6 and player.gravity == 20:
-            pygame.time.set_timer(pygame.USEREVENT+2, 800)
-            create_heart()
-            create_jump_boost()
-        elif score == 5:            
-            create_jump_boost()
-        elif score == 4:
-            pygame.time.set_timer(pygame.USEREVENT+2, 1200)
-        elif score == 2:
-            pygame.time.set_timer(pygame.USEREVENT+2, 1500)
-            create_heart()
+        score, background_speed = treasure_collected(score, background_speed, player)
+        print(score, background_speed)
   
     # check score and health to see if game over
     if score >= win_score:
@@ -357,7 +367,7 @@ while running:
         player.apply_gravity()
     else:
         player.apply_falling_gravity()
-        
+
     if player.rect.y > screen_height:
         game_over = True
         won = False
