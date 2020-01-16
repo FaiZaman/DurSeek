@@ -26,6 +26,7 @@ background = pygame.image.load("assets/background/background.jpg")
 background_flipped = pygame.image.load("assets/background/background_flipped.jpg")
 background_x1 = 0
 background_x2 = background.get_width()
+treasure_image = pygame.image.load("assets/misc/treasure.png")
 
 # load in music and sound effects
 pygame.mixer.music.load('assets/sound/theme.mp3')
@@ -44,8 +45,9 @@ def redraw_window(window, player):
     window.blit(background_flipped, (background_x2, 0))
 
     # render the score
-    text = small_font.render('Score: ' + str(score), 1, (0, 0, 0))
-    window.blit(text, (30, 60))
+    window.blit(treasure_image, (30, 60))
+    text = small_font.render("x" + str(score), 1, (0, 0, 0))
+    window.blit(text, (110, 80))
 
     # draw health bar
     pygame.draw.rect(window, (200, 0, 0), (30, 10, 500, 40))
@@ -281,6 +283,7 @@ while running:
         treasure_sound.play()
         score += 1
         background_speed += 1
+        player.speed += 1
         if score == 8 and player.gravity == 20:
             pygame.time.set_timer(pygame.USEREVENT+2, 400)
             create_heart()
