@@ -26,12 +26,13 @@ class Player(Entity):
         self.walk_right = False
         self.walk_left = False
         self.is_jumping = False
-        self.jump_length = 12
         self.falling = False
         self.on_ground = True
         self.facing_right = True
         self.knockback = 50
         self.y_speed = 0
+        self.jump_loop = 0
+        self.falling_gravity = 5
     
 
     def set_image(self):
@@ -75,13 +76,15 @@ class Player(Entity):
 
         if not(self.is_jumping):
             self.on_ground = True
-            if jump_key1 or jump_key2:
-                self.is_jumping = True
-                self.walk_left = False
-                self.walk_right = False
-                self.steps = 0
-                self.on_ground = False
-                self.y_speed = 30
+            if (jump_key1 or jump_key2):
+                if self.jump_loop == 0:
+                    self.is_jumping = True
+                    self.walk_left = False
+                    self.walk_right = False
+                    self.steps = 0
+                    self.on_ground = False
+                    self.y_speed = 30
+                    self.jump_loop = 1
         else:
             if self.on_ground:
                 self.is_jumping = False
@@ -92,6 +95,10 @@ class Player(Entity):
                 if self.y_speed < 20:
                     self.falling = True
 
+
+    def apply_falling_gravity(self):
+
+        self.rect.y += self.falling_gravity
 
     def lose_health(self):
 
@@ -110,5 +117,3 @@ class Player(Entity):
             self.on_ground = True
             self.falling = False
             self.is_jumping = False
-        elif not(self.on_ground) and self.y_speed < 15:
-            falling = True

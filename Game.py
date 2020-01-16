@@ -115,7 +115,7 @@ def draw_ground():
     platform_y = [490, 520, 550]
 
     for i in range(0, 50000, 128):
-        if (rand.random() > 0.2 or i <= 512):
+        if (rand.random() > 0.3 or i <= 512):
             ground = Platform(i, screen_height - 128)
             platforms.add(ground)
             game_objects.add(ground)
@@ -164,6 +164,7 @@ first_game = True
 starting = True
 won = False
 high_platform_y = [300, 350, 400, 450, 500]
+jump_loop = 0
 
 # main event loop
 running = True
@@ -197,6 +198,11 @@ while running:
 
     # clock speed and event detection
     clock.tick(fps)
+
+    if player.jump_loop > 0:
+        player.jump_loop += 1
+    if player.jump_loop > 70:
+        player.jump_loop = 0
 
      # background scrolling with player
     background_x1 -= 1
@@ -345,9 +351,13 @@ while running:
             sprites.add(fireball)
 
     player.jump(keys[pygame.K_UP], keys[pygame.K_w])
-    
+
     # end game if player fell off screen
-    player.apply_gravity()
+    if player.is_jumping:
+        player.apply_gravity()
+    else:
+        player.apply_falling_gravity()
+        
     if player.rect.y > screen_height:
         game_over = True
         won = False
