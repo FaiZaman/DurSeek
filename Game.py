@@ -73,18 +73,21 @@ def draw_game_over(window, starting, won, score):
 
     pygame.mixer.music.stop()
     window.fill((0, 220, 0))
-    play = medium_font.render("Press any key to begin", 1, (128, 0, 128))
-    again = medium_font.render("Press any key to play again", 1, (128, 0, 128))
+    play_easy = medium_font.render("Press the E key to play EASY MODE", 1, (128, 0, 128))
+    play_medium = medium_font.render("Press the M key to play MEDIUM MODE", 1, (128, 0, 128))
+    play_hard = medium_font.render("Press the H key to play HARD MODE", 1, (128, 0, 128))
+    window.blit(play_easy, (200, 400))
+    window.blit(play_medium, (170, 500))
+    window.blit(play_hard, (200, 600))
 
     if starting:
         title = large_font.render('DURSEEK', 1, (128, 0, 128))
-        window.blit(title, (375, 150))
+        window.blit(title, (375, 100))
 
         controls = small_font.render('Use the arrow keys or WASD to move and jump, and space to shoot', 1, (128, 0, 128))
         instructions = small_font.render('Collect all 10 treasures to win, and keep ahead of the red storm behind you!', 1, (128, 0, 128))
-        window.blit(controls, (150, 300))
-        window.blit(instructions, (50, 450))
-        window.blit(play, (300, 600))
+        window.blit(controls, (120, 200))
+        window.blit(instructions, (60, 300))
         pygame.display.update()
     else:
         if won:
@@ -95,7 +98,7 @@ def draw_game_over(window, starting, won, score):
             score_text = medium_font.render('Score: ' + str(score), 1, (128, 0, 128))
             window.blit(text, (420, 200))
             window.blit(score_text, (430, 300))
-        window.blit(again, (300, 400))
+        
         pygame.display.update()
         time.sleep(2.5)
             
@@ -106,8 +109,18 @@ def draw_game_over(window, starting, won, score):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-            if event.type == pygame.KEYUP:
-                waiting = False
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_e]:
+            difficulty = "easy"
+            waiting = False
+        elif keys[pygame.K_m]:
+            difficulty = "medium"
+            waiting = False
+        elif keys[pygame.K_h]:
+            difficulty = "hard"
+            waiting = False
+    return difficulty
 
 
 def draw_ground():
@@ -152,30 +165,74 @@ def create_jump_boost():
     sprites.add(jump_boost)
 
 
-def treasure_collected(score, background_speed, player):
+def treasure_collected(score, background_speed, player, difficulty):
 
     treasure_sound.play()
     score += 1
     background_speed += 1
     player.speed += 1
-    if score == 8:
-        pygame.time.set_timer(pygame.USEREVENT+2, 400)
-        create_heart()
-        if player.gravity > 18:
-            create_jump_boost()
-    elif score == 6:
-        pygame.time.set_timer(pygame.USEREVENT+2, 800)
-        create_heart()
-        if player.gravity > 18:
-            create_jump_boost()
-    elif score == 5:            
-        if player.gravity > 18:
-            create_jump_boost()
-    elif score == 4:
-        pygame.time.set_timer(pygame.USEREVENT+2, 1200)
-    elif score == 2:
-        pygame.time.set_timer(pygame.USEREVENT+2, 1500)
-        create_heart()
+
+    if difficulty == "easy":
+        if score == 8:
+            background_speed -= 1
+            pygame.time.set_timer(pygame.USEREVENT+2, 1200)
+            create_heart()
+            if player.gravity > 18:
+                create_jump_boost()
+        elif score == 6:
+            pygame.time.set_timer(pygame.USEREVENT+2, 1400)
+            create_heart()
+            if player.gravity > 18:
+                create_jump_boost()
+        elif score == 4:
+            background_speed -= 1
+            create_heart()
+            pygame.time.set_timer(pygame.USEREVENT+2, 1600)
+            if player.gravity > 18:
+                create_jump_boost()
+        elif score == 2:
+            pygame.time.set_timer(pygame.USEREVENT+2, 1800)
+            create_heart()
+            if player.gravity > 18:
+                create_jump_boost()
+
+    elif difficulty == "medium":
+        if score == 8:
+            pygame.time.set_timer(pygame.USEREVENT+2, 700)
+            create_heart()
+        elif score == 6:
+            pygame.time.set_timer(pygame.USEREVENT+2, 1000)
+            create_heart()
+            if player.gravity > 18:
+                create_jump_boost()
+        elif score == 4:
+            pygame.time.set_timer(pygame.USEREVENT+2, 1300)
+            if player.gravity > 18:
+                create_jump_boost()
+        elif score == 2:
+            if player.gravity > 18:
+                create_jump_boost()
+            pygame.time.set_timer(pygame.USEREVENT+2, 1600)
+            create_heart()
+    
+    elif difficulty == "hard":
+        if score == 8:
+            pygame.time.set_timer(pygame.USEREVENT+2, 400)
+            create_heart()
+        elif score == 6:
+            background_speed += 1
+            player.speed += 1
+            pygame.time.set_timer(pygame.USEREVENT+2, 800)
+            if player.gravity > 18:
+                create_jump_boost()
+        elif score == 4:
+            background_speed += 1
+            player.speed += 1
+            create_heart()
+            pygame.time.set_timer(pygame.USEREVENT+2, 1200)
+        elif score == 2:
+            pygame.time.set_timer(pygame.USEREVENT+2, 1500)
+
     return score, background_speed
 
 
@@ -183,14 +240,14 @@ def treasure_collected(score, background_speed, player):
 small_font = pygame.font.SysFont('comicsans', 30, True)
 medium_font = pygame.font.SysFont('comicsans', 45, True)
 large_font = pygame.font.SysFont('comicsans', 75, True)
-pygame.time.set_timer(pygame.USEREVENT+1, 10000)
-pygame.time.set_timer(pygame.USEREVENT+2, 2000)
-pygame.time.set_timer(pygame.USEREVENT+3, 5000)
+pygame.time.set_timer(pygame.USEREVENT+1, 10000)    # treasure
+pygame.time.set_timer(pygame.USEREVENT+2, 2000)     # enemies
+pygame.time.set_timer(pygame.USEREVENT+3, 5000)     # platforms
 game_over = True
 first_game = True
 starting = True
 won = False
-high_platform_y = [300, 350, 400, 450, 500]
+high_platform_y = [300, 330, 370, 400, 430, 460, 490]
 jump_loop = 0
 
 # main event loop
@@ -198,7 +255,7 @@ running = True
 while running:
 
     if game_over:
-        draw_game_over(window, starting, won, score)
+        difficulty = draw_game_over(window, starting, won, score)
         game_over = False
         starting = False
         
@@ -222,6 +279,7 @@ while running:
         background_speed = 4    
 
         pygame.mixer.music.play(-1)
+        print(difficulty)
 
     # clock speed and event detection
     clock.tick(fps)
@@ -313,8 +371,7 @@ while running:
 
     treasure_collisions = pygame.sprite.spritecollide(player, treasures, True)
     if treasure_collisions:
-        score, background_speed = treasure_collected(score, background_speed, player)
-        print(score, background_speed)
+        score, background_speed = treasure_collected(score, background_speed, player, difficulty)
   
     # check score and health to see if game over
     if score >= win_score:
