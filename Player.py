@@ -33,6 +33,7 @@ class Player(Entity):
         self.y_speed = 0
         self.jump_loop = 0
         self.falling_gravity = 5
+        self.jump_limit = 70
     
 
     def set_image(self):

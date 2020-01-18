@@ -123,18 +123,30 @@ def draw_game_over(window, starting, won, score):
     return difficulty
 
 
-def draw_ground():
+def draw_ground(difficulty):
 
     platform_y = [490, 520, 550]
+    prev_generated = False
 
-    for i in range(0, 50000, 128):
-        if (rand.random() > 0.3 or i <= 512):
+    if difficulty == "easy":
+        spawn_rate = 0.2
+    elif difficulty == "medium":
+        spawn_rate = 0.3
+    elif difficulty == "hard":
+        spawn_rate = 0.5
+
+    for i in range(0, 65000, 128):
+        if (rand.random() > spawn_rate or i <= 512):
             ground = Platform(i, screen_height - 128)
             platforms.add(ground)
             game_objects.add(ground)
             sprites.add(ground)
+            prev_generated = True
         else:
-            draw_platform(i, rand.randrange(1, 2), rand.choice(platform_y))
+            if not(prev_generated):
+                draw_platform(rand.choice([i, i - 128]), rand.randrange(1, 2), rand.choice(platform_y))
+            prev_generated = False
+    return spawn_rate
 
 
 def draw_platform(x, width, y_position):
@@ -158,7 +170,7 @@ def create_heart():
 
 def create_jump_boost():
 
-    jump_boost = JumpBoost(rand.randrange(1500, 2500), rand.randrange(0, 300))
+    jump_boost = JumpBoost(rand.randrange(3000, 3500), rand.randrange(0, 300))
     jump_boosts.add(jump_boost)
     gravitons.add(jump_boost)
     game_objects.add(jump_boost)
@@ -171,47 +183,50 @@ def treasure_collected(score, background_speed, player, difficulty):
     score += 1
     background_speed += 1
     player.speed += 1
+    player.jump_limit -= 2
 
     if difficulty == "easy":
         if score == 8:
-            background_speed -= 1
             pygame.time.set_timer(pygame.USEREVENT+2, 1200)
             create_heart()
             if player.gravity > 18:
                 create_jump_boost()
         elif score == 6:
+            background_speed -= 1
+            player.speed -= 1
             pygame.time.set_timer(pygame.USEREVENT+2, 1400)
             create_heart()
             if player.gravity > 18:
                 create_jump_boost()
         elif score == 4:
             background_speed -= 1
+            player.speed -= 1
             create_heart()
             pygame.time.set_timer(pygame.USEREVENT+2, 1600)
             if player.gravity > 18:
                 create_jump_boost()
         elif score == 2:
+            background_speed -= 1
+            player.speed -= 1
             pygame.time.set_timer(pygame.USEREVENT+2, 1800)
             create_heart()
-            if player.gravity > 18:
-                create_jump_boost()
 
     elif difficulty == "medium":
         if score == 8:
             pygame.time.set_timer(pygame.USEREVENT+2, 700)
+            if player.gravity > 18:
+                create_jump_boost()
             create_heart()
         elif score == 6:
+            background_speed -= 1
+            player.speed -= 1
             pygame.time.set_timer(pygame.USEREVENT+2, 1000)
             create_heart()
             if player.gravity > 18:
                 create_jump_boost()
         elif score == 4:
             pygame.time.set_timer(pygame.USEREVENT+2, 1300)
-            if player.gravity > 18:
-                create_jump_boost()
         elif score == 2:
-            if player.gravity > 18:
-                create_jump_boost()
             pygame.time.set_timer(pygame.USEREVENT+2, 1600)
             create_heart()
     
@@ -220,14 +235,10 @@ def treasure_collected(score, background_speed, player, difficulty):
             pygame.time.set_timer(pygame.USEREVENT+2, 400)
             create_heart()
         elif score == 6:
-            background_speed += 1
-            player.speed += 1
             pygame.time.set_timer(pygame.USEREVENT+2, 800)
             if player.gravity > 18:
                 create_jump_boost()
         elif score == 4:
-            background_speed += 1
-            player.speed += 1
             create_heart()
             pygame.time.set_timer(pygame.USEREVENT+2, 1200)
         elif score == 2:
@@ -240,7 +251,7 @@ def treasure_collected(score, background_speed, player, difficulty):
 small_font = pygame.font.SysFont('comicsans', 30, True)
 medium_font = pygame.font.SysFont('comicsans', 45, True)
 large_font = pygame.font.SysFont('comicsans', 75, True)
-pygame.time.set_timer(pygame.USEREVENT+1, 10000)    # treasure
+pygame.time.set_timer(pygame.USEREVENT+1, 6000)    # treasure
 pygame.time.set_timer(pygame.USEREVENT+2, 2000)     # enemies
 pygame.time.set_timer(pygame.USEREVENT+3, 5000)     # platforms
 game_over = True
@@ -269,24 +280,36 @@ while running:
         platforms = pygame.sprite.Group()
         hearts = pygame.sprite.Group()
         jump_boosts = pygame.sprite.Group()
-        draw_ground()
+        spawn_rate = draw_ground(difficulty)
 
         player = Player()
         sprites.add(player)
 
         player.health = 100
         score = 0
-        background_speed = 4    
+        background_speed = 4
+        if difficulty == "hard":
+            background_speed += 1
+            player.speed += 1
 
         pygame.mixer.music.play(-1)
-        print(difficulty)
 
     # clock speed and event detection
     clock.tick(fps)
 
+    if difficulty == "easy":
+        if player.health < 100 and rand.random() > 0.9995:
+            create_heart()
+    elif difficulty == "medium":
+        if player.health <= 70 and rand.random() > 0.9997:
+            create_heart()
+    elif difficulty == "hard":
+        if player.health <= 40 and rand.random() > 0.9999:
+            create_heart()
+
     if player.jump_loop > 0:
         player.jump_loop += 1
-    if player.jump_loop > 70:
+    if player.jump_loop > player.jump_limit:
         player.jump_loop = 0
 
      # background scrolling with player
@@ -333,7 +356,7 @@ while running:
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             spawn_probability = rand.random()
             if event.type == pygame.USEREVENT+1:
-                if spawn_probability > 0.5:
+                if spawn_probability > spawn_rate:
                     treasure = Treasure(rand.randrange(1500, 2000), rand.randrange(0, 200))
                     treasures.add(treasure)
                     gravitons.add(treasure)
