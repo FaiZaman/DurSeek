@@ -11,15 +11,3 @@ class Platform(Entity):
 
         super().__init__(x, y, self.ground)
         self.image = self.ground
-
-
-    def get_coords_list(self, ground_coords, tx, ty):
-
-        i = 0
-        while i <= (1000/tx) + tx:
-            ground_spawn = rand.random()
-            if ground_spawn > 0.2 or i == 0:
-                ground_coords.append(i*tx)
-            i += 1
-    
-        return ground_coords

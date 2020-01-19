@@ -13,13 +13,12 @@ class Player(Entity):
                 pygame.image.load("assets/character/walk/R5.png"), pygame.image.load("assets/character/walk/R6.png")]
 
     left_standing_list = [pygame.image.load("assets/character/standing/standing_L1.png"), pygame.image.load("assets/character/standing/standing_L2.png")]
-
     right_standing_list = [pygame.image.load("assets/character/standing/standing_R1.png"), pygame.image.load("assets/character/standing/standing_R2.png")]
 
     def __init__(self):
 
-        super().__init__(100, 500, self.right_standing_list[0])
-        self.speed = 10
+        super().__init__(200, 500, self.right_standing_list[0])
+        self.speed = 5
         self.steps = 0
         self.health = 100
         self.standing = True
@@ -27,14 +26,14 @@ class Player(Entity):
         self.walk_right = False
         self.walk_left = False
         self.is_jumping = False
-        self.jump_length = 12
         self.falling = False
         self.on_ground = True
         self.facing_right = True
-        self.cooldown = 0
-        self.tinted = False
-        self.tint_scale = 0.5
         self.knockback = 50
+        self.y_speed = 0
+        self.jump_loop = 0
+        self.falling_gravity = 5
+        self.jump_limit = 70
     
 
     def set_image(self):
@@ -55,16 +54,11 @@ class Player(Entity):
             else:
                 self.image = self.right_standing_list[self.stand_count % 2]
             self.stand_count += 1
-        
-        if self.tinted:
-            self.tint()
-            self.tinted = False
 
 
     def move_left(self):
 
-        if self.rect.x >= 400:
-            self.rect.x -= self.speed
+        self.rect.x -= self.speed/2
         self.walk_left = True
         self.walk_right = False
         self.standing = False
@@ -73,65 +67,54 @@ class Player(Entity):
     
     def move_right(self):
 
-        if self.rect.x < 400:
-            self.rect.x += self.speed
         self.walk_left = False
         self.walk_right = True
         self.standing = False
         self.facing_right = True
 
 
-    def jump(self, jump_key):
+    def jump(self, jump_key1, jump_key2):
 
-        # quadratic jumping functionality
         if not(self.is_jumping):
-            self.falling = False
             self.on_ground = True
-            if jump_key:
-                self.is_jumping = True
-                self.walk_left = False
-                self.walk_right = False
-                self.steps = 0
-                self.on_ground = False
+            if (jump_key1 or jump_key2):
+                if self.jump_loop == 0:
+                    self.is_jumping = True
+                    self.walk_left = False
+                    self.walk_right = False
+                    self.steps = 0
+                    self.on_ground = False
+                    self.y_speed = 30
+                    self.jump_loop = 1
         else:
-            if self.jump_length >= -12:
-                multiplier = 1
-                if self.jump_length < 0:
-                    self.falling = True
-                    multiplier = -1
-                self.rect.bottom -= (self.jump_length ** 2) * 0.5 * multiplier
-                self.jump_length -= 1
-            else:
+            if self.on_ground:
                 self.is_jumping = False
-                self.jump_length = 12
-        
+                self.y_speed = 0
+            else:
+                self.y_speed -= self.gravity * (1/60)
+                self.rect.y -= self.y_speed
+                if self.y_speed < 20:
+                    self.falling = True
+
+
+    def apply_falling_gravity(self):
+
+        self.rect.y += self.falling_gravity
 
     def lose_health(self):
 
-        if self.cooldown > 0:
-            self.cooldown -= 1
-        else:
-            self.cooldown = 10
-            self.health -= 10
-            if self.facing_right:
-                self.rect.x -= self.knockback
-            else:
-                self.rect.x += self.knockback
-            self.tinted = True
-
-
-    def tint(self):
-
-        GB = min(255, max(0, round(255 * (1 - self.tint_scale))))
-        self.image.fill((255, GB, GB), special_flags = pygame.BLEND_MULT)
+        self.health -= 10
+        self.rect.x -= self.knockback
 
 
     def player_platform_collision_handling(self, collisions):
 
-        if collisions:
-            highest_y = 0
-            for platform in collisions:
-                if platform.rect.top > highest_y:
-                    highest_y = platform.rect.top
-            if (self.rect.y < highest_y and self.falling) or (self.rect.y < highest_y and self.on_ground):
-                self.rect.bottom = highest_y + 12
+        highest_y = 0
+        for platform in collisions:
+            if platform.rect.top > highest_y:
+                highest_y = platform.rect.top
+        if (self.falling or self.on_ground) and self.rect.y + 60 < highest_y:
+            self.rect.bottom = highest_y + 12
+            self.on_ground = True
+            self.falling = False
+            self.is_jumping = False
